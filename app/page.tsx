@@ -5,6 +5,34 @@ import StarterKit from '@tiptap/starter-kit';
 import { InlineComplete } from '@/lib/InlineComplete';
 import { ApiResponse } from '@/lib/types';
 
+const MenuButton = ({ 
+  onClick,
+  isActive,
+  disabled,
+  children
+}: {
+  onClick: () => void;
+  isActive: boolean;
+  disabled?: boolean;
+  children: React.ReactNode;
+}) => (
+  <button
+    onClick={onClick}
+    disabled={disabled}
+    className={`px-3 py-1.5 text-sm rounded transition-colors ${
+      isActive
+        ? 'bg-blue-100 text-blue-700 border border-blue-200'
+        : 'hover:bg-gray-100 border border-transparent'
+    }`}
+  >
+    {children}
+  </button>
+);
+
+const MenuSeparator = () => (
+  <div className="w-px h-6 bg-gray-300 mx-1 self-center"></div>
+);
+
 const MenuBar = ({ editor }: { editor: Editor | null }) => {
   if (!editor) {
     return null;
@@ -12,101 +40,65 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
 
   return (
     <div className="border-b border-gray-200 p-2 flex flex-wrap gap-1 bg-gray-50">
-      <button
+      <MenuButton
         onClick={() => editor.chain().focus().toggleBold().run()}
+        isActive={editor.isActive('bold')}
         disabled={!editor.can().chain().focus().toggleBold().run()}
-        className={`px-3 py-1.5 text-sm rounded transition-colors ${
-          editor.isActive('bold')
-            ? 'bg-blue-100 text-blue-700 border border-blue-200'
-            : 'hover:bg-gray-100 border border-transparent'
-        }`}
       >
         <strong>B</strong>
-      </button>
-      <button
+      </MenuButton>
+      <MenuButton
         onClick={() => editor.chain().focus().toggleItalic().run()}
+        isActive={editor.isActive('italic')}
         disabled={!editor.can().chain().focus().toggleItalic().run()}
-        className={`px-3 py-1.5 text-sm rounded transition-colors ${
-          editor.isActive('italic')
-            ? 'bg-blue-100 text-blue-700 border border-blue-200'
-            : 'hover:bg-gray-100 border border-transparent'
-        }`}
       >
         <em>I</em>
-      </button>
-      <button
+      </MenuButton>
+      <MenuButton
         onClick={() => editor.chain().focus().toggleStrike().run()}
+        isActive={editor.isActive('strike')}
         disabled={!editor.can().chain().focus().toggleStrike().run()}
-        className={`px-3 py-1.5 text-sm rounded transition-colors ${
-          editor.isActive('strike')
-            ? 'bg-blue-100 text-blue-700 border border-blue-200'
-            : 'hover:bg-gray-100 border border-transparent'
-        }`}
       >
         <s>S</s>
-      </button>
-      <div className="w-px h-6 bg-gray-300 mx-1 self-center"></div>
-      <button
+      </MenuButton>
+      <MenuSeparator />
+      <MenuButton
         onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-        className={`px-3 py-1.5 text-sm rounded transition-colors ${
-          editor.isActive('heading', { level: 1 })
-            ? 'bg-blue-100 text-blue-700 border border-blue-200'
-            : 'hover:bg-gray-100 border border-transparent'
-        }`}
+        isActive={editor.isActive('heading', { level: 1 })}
       >
         H1
-      </button>
-      <button
+      </MenuButton>
+      <MenuButton
         onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-        className={`px-3 py-1.5 text-sm rounded transition-colors ${
-          editor.isActive('heading', { level: 2 })
-            ? 'bg-blue-100 text-blue-700 border border-blue-200'
-            : 'hover:bg-gray-100 border border-transparent'
-        }`}
+        isActive={editor.isActive('heading', { level: 2 })}
       >
         H2
-      </button>
-      <button
+      </MenuButton>
+      <MenuButton
         onClick={() => editor.chain().focus().setParagraph().run()}
-        className={`px-3 py-1.5 text-sm rounded transition-colors ${
-          editor.isActive('paragraph')
-            ? 'bg-blue-100 text-blue-700 border border-blue-200'
-            : 'hover:bg-gray-100 border border-transparent'
-        }`}
+        isActive={editor.isActive('paragraph')}
       >
         P
-      </button>
-      <div className="w-px h-6 bg-gray-300 mx-1 self-center"></div>
-      <button
+      </MenuButton>
+      <MenuSeparator />
+      <MenuButton
         onClick={() => editor.chain().focus().toggleBulletList().run()}
-        className={`px-3 py-1.5 text-sm rounded transition-colors ${
-          editor.isActive('bulletList')
-            ? 'bg-blue-100 text-blue-700 border border-blue-200'
-            : 'hover:bg-gray-100 border border-transparent'
-        }`}
+        isActive={editor.isActive('bulletList')}
       >
         • List
-      </button>
-      <button
+      </MenuButton>
+      <MenuButton
         onClick={() => editor.chain().focus().toggleOrderedList().run()}
-        className={`px-3 py-1.5 text-sm rounded transition-colors ${
-          editor.isActive('orderedList')
-            ? 'bg-blue-100 text-blue-700 border border-blue-200'
-            : 'hover:bg-gray-100 border border-transparent'
-        }`}
+        isActive={editor.isActive('orderedList')}
       >
         1. List
-      </button>
-      <button
+      </MenuButton>
+      <MenuButton
         onClick={() => editor.chain().focus().toggleBlockquote().run()}
-        className={`px-3 py-1.5 text-sm rounded transition-colors ${
-          editor.isActive('blockquote')
-            ? 'bg-blue-100 text-blue-700 border border-blue-200'
-            : 'hover:bg-gray-100 border border-transparent'
-        }`}
+        isActive={editor.isActive('blockquote')}
       >
         ❝ Quote
-      </button>
+      </MenuButton>
     </div>
   );
 };
