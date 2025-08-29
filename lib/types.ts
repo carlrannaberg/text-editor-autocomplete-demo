@@ -1,16 +1,8 @@
 // lib/types.ts
 
-/**
- * Branded type for validated text input
- * Ensures text has been properly validated before processing
- */
-export type ValidatedText = string & { readonly __brand: 'ValidatedText' };
-
-/**
- * Branded type for AI-generated completion text
- * Distinguishes completion text from regular strings for type safety
- */
-export type CompletionText = string & { readonly __brand: 'CompletionText' };
+// Simple type aliases for better code readability
+export type ValidatedText = string;
+export type CompletionText = string;
 
 /**
  * Request interface for AI completion with validation
@@ -68,8 +60,8 @@ export type ApiResponse =
  * @interface InlineCompleteOptions
  */
 export interface InlineCompleteOptions {
-  /** Function to fetch completion tail for given input */
-  fetchTail: (left: string) => Promise<ApiResponse>;
+  /** Function to fetch completion tail for given input (optional - uses built-in API if not provided) */
+  fetchTail?: (left: string) => Promise<ApiResponse>;
   /** Debounce delay in milliseconds before triggering completion */
   debounceMs?: number;
   /** Maximum length of prefix text to send for completion */

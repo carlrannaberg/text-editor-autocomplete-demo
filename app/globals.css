@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 /* Import editor-specific styling */
-@import '../styles/editor.css';
+@import './styles/editor.css';
 
 :root {
   --background: #ffffff;

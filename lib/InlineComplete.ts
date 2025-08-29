@@ -147,14 +147,6 @@ export const InlineComplete = Extension.create<InlineCompleteOptions>({
 
   addOptions() {
     return {
-      fetchTail: async (): Promise<ApiResponse> => ({ 
-        success: false, 
-        error: { 
-          type: 'NETWORK_ERROR' as const, 
-          message: 'No completion function configured', 
-          retryable: true 
-        }
-      }),
       debounceMs: 120,
       maxPrefixLength: 1000,
       enabled: true,

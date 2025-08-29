@@ -1,9 +1,8 @@
 'use client';
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 import { useEditor, EditorContent, Editor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { InlineComplete } from '@/lib/InlineComplete';
-import { ApiResponse } from '@/lib/types';
 
 const MenuButton = ({ 
   onClick,
@@ -104,41 +103,10 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
 };
 
 const AutocompleteEditor: React.FC = () => {
-  const abortControllerRef = useRef<AbortController | null>(null);
-  
-  const fetchTail = useCallback(async (left: string): Promise<ApiResponse> => {
-    // Cancel previous request
-    abortControllerRef.current?.abort();
-    abortControllerRef.current = new AbortController();
-    
-    try {
-      const response = await fetch('/api/complete', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ left }),
-        signal: abortControllerRef.current.signal,
-      });
-      
-      if (!response.ok) {
-        throw new Error(`API error: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      return { success: true, data };
-    } catch (error) {
-      if (error instanceof Error && error.name === 'AbortError') {
-        return { success: false, error: { type: 'NETWORK_ERROR', message: 'Cancelled', retryable: true } };
-      }
-      console.error('Autocomplete failed:', error);
-      return { success: false, error: { type: 'NETWORK_ERROR', message: 'Network failure', retryable: true } };
-    }
-  }, []);
-
   const editor = useEditor({
     extensions: [
       StarterKit,
       InlineComplete.configure({
-        fetchTail,
         debounceMs: 120,
         maxPrefixLength: 1000,
         enabled: true,
@@ -153,12 +121,11 @@ const AutocompleteEditor: React.FC = () => {
         spellcheck: 'false',
       },
     },
-  }, [fetchTail]); // Proper dependency array
+  }, []); // Empty dependency array since using built-in manager
 
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      abortControllerRef.current?.abort();
       editor?.destroy();
     };
   }, [editor]);
