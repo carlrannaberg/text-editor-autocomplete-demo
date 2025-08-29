@@ -48,6 +48,14 @@ const AutocompleteEditor: React.FC = () => {
     ],
     content: '',
     autofocus: 'end',
+    immediatelyRender: false,
+    editorProps: {
+      attributes: {
+        class: 'prose prose-lg prose-gray max-w-none focus:outline-none',
+        'data-placeholder': 'Start typing to see AI autocomplete suggestions...',
+        spellcheck: 'false',
+      },
+    },
   }, [fetchTail]); // Proper dependency array
 
   // Cleanup on unmount
@@ -67,18 +75,27 @@ const AutocompleteEditor: React.FC = () => {
   }
 
   return (
-    <div className="prose mx-auto max-w-4xl p-6">
-      <h1 className="text-3xl font-bold mb-6">AI Autocomplete Demo</h1>
-      <div className="editor-container">
-        <EditorContent editor={editor} className="editor-content" />
-      </div>
-      <div className="mt-4 text-sm text-gray-500 space-x-4">
-        <span>
-          Press <kbd className="px-2 py-1 bg-gray-100 rounded text-xs">Tab</kbd> to accept suggestions
-        </span>
-        <span>
-          Press <kbd className="px-2 py-1 bg-gray-100 rounded text-xs">Esc</kbd> to dismiss
-        </span>
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-4xl mx-auto px-6 py-12">
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-gray-900 mb-3">AI Autocomplete Demo</h1>
+          <p className="text-lg text-gray-600">Experience AI-powered writing assistance as you type</p>
+        </div>
+        
+        <div className="editor-container mb-6">
+          <EditorContent editor={editor} className="editor-content" />
+        </div>
+        
+        <div className="flex items-center justify-center gap-8 text-sm text-gray-500">
+          <div className="flex items-center gap-2">
+            <kbd className="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-xs font-mono shadow-sm">Tab</kbd>
+            <span>Accept suggestion</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <kbd className="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-xs font-mono shadow-sm">Esc</kbd>
+            <span>Dismiss</span>
+          </div>
+        </div>
       </div>
     </div>
   );

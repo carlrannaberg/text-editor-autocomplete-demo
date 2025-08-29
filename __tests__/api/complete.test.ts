@@ -8,6 +8,11 @@ jest.mock('ai', () => ({
   streamText: jest.fn(),
 }));
 
+// Mock the Google AI SDK
+jest.mock('@ai-sdk/google', () => ({
+  google: jest.fn(),
+}));
+
 const mockStreamText = streamText as jest.Mock;
 
 // Helper to create NextRequest-like objects for testing

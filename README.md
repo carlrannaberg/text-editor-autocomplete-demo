@@ -9,7 +9,7 @@ An AI-powered text editor with inline completion using Next.js, Tiptap, and Goog
 Create a `.env.local` file in the root directory with the following:
 
 ```
-GOOGLE_AI_API_KEY=your_api_key_here
+GOOGLE_GENERATIVE_AI_API_KEY=your_api_key_here
 # Optional: Override the default model (defaults to gemini-2.5-flash-lite)
 # GEMINI_MODEL=gemini-2.5-flash
 ```

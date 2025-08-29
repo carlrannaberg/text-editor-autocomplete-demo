@@ -66,6 +66,13 @@ describe('AutocompleteEditor', () => {
         extensions: expect.any(Array),
         content: '',
         autofocus: 'end',
+        editorProps: expect.objectContaining({
+          attributes: expect.objectContaining({
+            class: 'prose prose-lg prose-gray max-w-none focus:outline-none',
+            'data-placeholder': 'Start typing to see AI autocomplete suggestions...',
+            spellcheck: 'false'
+          })
+        })
       }),
       expect.any(Array)
     );

@@ -1,25 +1,136 @@
-/* Ghost text styling for AI autocomplete */
+/* Enhanced Ghost text styling for AI autocomplete */
 .ghost-suggestion {
-  opacity: 0.35;
+  opacity: 0.4;
   pointer-events: none;
   white-space: pre;
-  color: #6b7280; /* Subtle gray */
+  color: #9ca3af; /* More subtle gray */
+  font-style: italic;
+  background: linear-gradient(90deg, #e5e7eb 0%, #f3f4f6 50%, #e5e7eb 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  transition: opacity 0.2s ease-in-out;
 }
 
-/* Additional Tailwind customizations for the editor */
+/* Professional TipTap Editor Styling */
 .editor-container {
-  @apply border border-gray-300 rounded-lg p-4 min-h-[200px] focus-within:border-blue-500;
+  @apply border border-gray-200 rounded-xl min-h-[400px] focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20 bg-white transition-all duration-200 shadow-sm hover:shadow-md;
 }
 
 .editor-content {
-  @apply prose prose-gray max-w-none;
+  @apply min-h-[400px];
 }
 
-/* Dark mode support for ghost text */
+/* Style the contenteditable area with prose typography */
+.editor-content .ProseMirror {
+  @apply px-6 py-4 min-h-[350px] focus:outline-none prose prose-lg prose-gray max-w-none;
+  font-family: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+}
+
+/* Typography hierarchy */
+.editor-content .ProseMirror p {
+  @apply my-4 first:mt-0 last:mb-0 text-base leading-relaxed text-gray-900;
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+.editor-content .ProseMirror h1 {
+  @apply text-3xl font-bold mt-8 mb-4 first:mt-0 last:mb-0 text-gray-900;
+}
+
+.editor-content .ProseMirror h2 {
+  @apply text-2xl font-semibold mt-6 mb-3 first:mt-0 last:mb-0 text-gray-900;
+}
+
+.editor-content .ProseMirror h3 {
+  @apply text-xl font-medium mt-4 mb-2 first:mt-0 last:mb-0 text-gray-900;
+}
+
+/* Selection styling */
+.editor-content .ProseMirror ::selection {
+  @apply bg-blue-100;
+}
+
+/* Placeholder styling */
+.editor-content .ProseMirror[data-placeholder]:empty::before {
+  content: attr(data-placeholder);
+  @apply text-gray-400 pointer-events-none float-left h-0;
+}
+
+/* Focus state */
+.editor-content .ProseMirror:focus {
+  @apply outline-none;
+}
+
+/* Lists */
+.editor-content .ProseMirror ul,
+.editor-content .ProseMirror ol {
+  @apply my-4 pl-6;
+}
+
+.editor-content .ProseMirror li {
+  @apply my-1;
+}
+
+/* Blockquotes */
+.editor-content .ProseMirror blockquote {
+  @apply border-l-4 border-gray-300 pl-4 my-4 italic text-gray-700;
+}
+
+/* Code */
+.editor-content .ProseMirror code {
+  @apply bg-gray-100 px-1 py-0.5 rounded text-sm font-mono;
+}
+
+.editor-content .ProseMirror pre {
+  @apply bg-gray-100 p-4 rounded-lg my-4 overflow-x-auto;
+}
+
+.editor-content .ProseMirror pre code {
+  @apply bg-transparent p-0;
+}
+
+/* Dark mode support */
 @media (prefers-color-scheme: dark) {
   .ghost-suggestion {
-    color: #9ca3af;
-    opacity: 0.4;
+    color: #6b7280;
+    opacity: 0.5;
+    background: linear-gradient(90deg, #4b5563 0%, #6b7280 50%, #4b5563 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+  }
+  
+  .editor-container {
+    @apply border-gray-700 bg-gray-900 focus-within:border-blue-400 focus-within:ring-blue-400/20;
+  }
+  
+  .editor-content .ProseMirror p {
+    @apply text-gray-100;
+  }
+  
+  .editor-content .ProseMirror h1,
+  .editor-content .ProseMirror h2,
+  .editor-content .ProseMirror h3 {
+    @apply text-gray-100;
+  }
+  
+  .editor-content .ProseMirror[data-placeholder]:empty::before {
+    @apply text-gray-500;
+  }
+  
+  .editor-content .ProseMirror ::selection {
+    @apply bg-blue-900/50;
+  }
+  
+  .editor-content .ProseMirror code {
+    @apply bg-gray-800 text-gray-300;
+  }
+  
+  .editor-content .ProseMirror pre {
+    @apply bg-gray-800;
+  }
+  
+  .editor-content .ProseMirror blockquote {
+    @apply border-gray-600 text-gray-300;
   }
 }
 
