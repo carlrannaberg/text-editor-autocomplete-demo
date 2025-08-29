@@ -68,6 +68,8 @@ export interface InlineCompleteOptions {
   maxPrefixLength?: number;
   /** Whether the completion feature is enabled */
   enabled?: boolean;
+  /** Whether Right Arrow also accepts the suggestion (off by default) */
+  acceptRightArrow?: boolean;
 }
 
 /**
@@ -86,4 +88,6 @@ export interface InlineCompleteState {
   isLoading: boolean;
   /** AbortController for cancelling in-flight requests */
   abortController: AbortController | null;
+  /** Optional confidence score for current suggestion */
+  confidence?: number;
 }

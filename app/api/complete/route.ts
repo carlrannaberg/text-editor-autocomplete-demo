@@ -15,7 +15,19 @@ const SYSTEM = `You are an inline autocomplete engine.
 - No introductions, no sentences, no punctuation unless it is literally the next character.
 - Never add quotes/formatting; no trailing whitespace.`;
 
-const BOUNDARY = /[\s\n\r\t,.;:!?…，。？！、）\)\]\}]/;
+const BOUNDARY = /[\s\n\r\t,.;:!?…，。？！、）\)\]\}\u2013\u2014·]/;
+
+function computeConfidence(output: string, flags: { boundaryStop: boolean; truncatedByCharLimit: boolean; truncatedByTokenLimit: boolean }): number {
+  if (!output || output.length === 0) return 0.0;
+  let conf = 0.5; // base
+  const len = output.length;
+  if (len <= 8) conf += 0.2; // short, crisp completions
+  else if (len <= 16) conf += 0.1;
+  if (flags.boundaryStop) conf += 0.1; // stopped cleanly at boundary
+  if (flags.truncatedByCharLimit || flags.truncatedByTokenLimit) conf -= 0.2; // lower confidence when truncated
+  conf = Math.max(0, Math.min(1, conf));
+  return Number(conf.toFixed(2));
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -53,6 +65,9 @@ export async function POST(request: NextRequest) {
 
       // Stream processing with boundary detection and token limiting
       let output = '';
+      let boundaryStop = false;
+      let truncatedByCharLimit = false;
+      let truncatedByTokenLimit = false;
       const maxTokens = 8; // Hard limit to reduce compute time
       const maxChars = 32; // Character limit backup
       
@@ -63,6 +78,7 @@ export async function POST(request: NextRequest) {
         if (potentialOutput.length > maxChars) {
           // Only take what fits within the limit
           output = potentialOutput.slice(0, maxChars);
+          truncatedByCharLimit = true;
           break;
         }
         
@@ -72,6 +88,7 @@ export async function POST(request: NextRequest) {
           // Only take what fits within token limit
           const maxAllowedChars = maxTokens * 4;
           output = potentialOutput.slice(0, maxAllowedChars);
+          truncatedByTokenLimit = true;
           break;
         }
         
@@ -81,18 +98,19 @@ export async function POST(request: NextRequest) {
         const boundaryMatch = output.match(BOUNDARY);
         if (boundaryMatch) {
           output = output.slice(0, boundaryMatch.index!);
+          boundaryStop = true;
           break;
         }
       }
 
       // Clean output
-      output = output.replace(/^\s+/, '').trim();
+      output = output.replace(/^\s+/, '').trimEnd();
       
       clearTimeout(timeoutId);
       
       return NextResponse.json({ 
         tail: output,
-        confidence: output.length > 0 ? 0.8 : 0.0
+        confidence: computeConfidence(output, { boundaryStop, truncatedByCharLimit, truncatedByTokenLimit })
       });
       
     } catch (aiError) {

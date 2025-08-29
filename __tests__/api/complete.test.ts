@@ -120,6 +120,25 @@ describe('Completion API', () => {
     expect(result.tail.length).toBeLessThanOrEqual(32);
   });
 
+  test('should lower confidence when truncated by limits', async () => {
+    const longChunk = 'x'.repeat(200);
+    const mockTextStream = async function* (): AsyncGenerator<string, void, unknown> {
+      yield longChunk; // forces char-limit truncation
+    };
+
+    mockStreamText.mockResolvedValue({
+      textStream: mockTextStream(),
+    } as MockStreamResponse);
+
+    const request = createMockRequest({ left: 'test' });
+
+    const response = await POST(request);
+    const result = await response.json();
+
+    expect(result.tail.length).toBeLessThanOrEqual(32);
+    expect(result.confidence).toBeLessThanOrEqual(0.4);
+  });
+
   test('should return non-empty completions', async () => {
     const mockTextStream = async function* (): AsyncGenerator<string, void, unknown> {
       yield 'hello';
@@ -156,6 +175,43 @@ describe('Completion API', () => {
     const result = await response.json();
 
     expect(result.tail).toBe('世界'); // Should stop at Chinese comma
+  });
+
+  test('should handle en/em dash boundaries', async () => {
+    const mockTextStream = async function* (): AsyncGenerator<string, void, unknown> {
+      yield 'status';
+      yield '—'; // en dash triggers boundary
+      yield 'details';
+    };
+
+    mockStreamText.mockResolvedValue({
+      textStream: mockTextStream(),
+    } as MockStreamResponse);
+
+    const request = createMockRequest({ left: 'summary' });
+
+    const response = await POST(request);
+    const result = await response.json();
+
+    expect(result.tail).toBe('status');
+  });
+
+  test('should handle middle dot boundaries', async () => {
+    const mockTextStream = async function* (): AsyncGenerator<string, void, unknown> {
+      yield 'A·'; // middle dot triggers boundary
+      yield 'B';
+    };
+
+    mockStreamText.mockResolvedValue({
+      textStream: mockTextStream(),
+    } as MockStreamResponse);
+
+    const request = createMockRequest({ left: 'A' });
+
+    const response = await POST(request);
+    const result = await response.json();
+
+    expect(result.tail).toBe('A');
   });
 
   test('should return proper confidence scores', async () => {
