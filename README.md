@@ -137,7 +137,3 @@ The autocomplete extension accepts several configuration options:
   acceptRightArrow: false    // Whether right arrow accepts suggestions
 }
 ```
-
-## Research & Implementation
-
-For detailed research on AI autocomplete approaches, confidence calculation methods, and implementation strategies, see [ai_autocomplete_research.md](ai_autocomplete_research.md).
