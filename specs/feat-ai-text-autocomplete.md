@@ -88,7 +88,7 @@ The challenge is creating a system that:
 
 ### 1. Enhanced Server-Side API (`app/api/complete/route.ts`)
 
-**Implementation with Error Handling and Rate Limiting:**
+**Simplified Demo Implementation:**
 
 ```typescript
 import { NextRequest, NextResponse } from 'next/server';
@@ -96,55 +96,10 @@ import { streamText } from 'ai';
 import { google } from '@ai-sdk/google';
 import { z } from 'zod';
 
-// Input validation schema
+// Basic input validation for demo
 const RequestSchema = z.object({
-  left: z.string()
-    .min(1, 'Text cannot be empty')
-    .max(5000, 'Text too long')
-    .refine(text => !text.includes('\0'), 'Invalid characters')
+  left: z.string().min(1).max(1000) // Simplified validation
 });
-
-// Rate limiting implementation
-const rateLimiter = new Map<string, { count: number; resetTime: number }>();
-
-const checkRateLimit = (ip: string): { allowed: boolean; retryAfter?: number } => {
-  const now = Date.now();
-  const limit = parseInt(process.env.API_RATE_LIMIT || '60');
-  
-  const current = rateLimiter.get(ip);
-  if (!current || now > current.resetTime) {
-    rateLimiter.set(ip, { count: 1, resetTime: now + 60000 });
-    return { allowed: true };
-  }
-  
-  if (current.count >= limit) {
-    return { allowed: false, retryAfter: Math.ceil((current.resetTime - now) / 1000) };
-  }
-  
-  current.count++;
-  return { allowed: true };
-};
-
-// Performance metrics tracking
-const metrics = {
-  requestCount: 0,
-  totalLatency: 0,
-  errorCount: 0,
-  
-  record(latency: number, success: boolean) {
-    this.requestCount++;
-    this.totalLatency += latency;
-    if (!success) this.errorCount++;
-    
-    if (this.requestCount % 100 === 0) {
-      console.log({
-        avgLatency: this.totalLatency / this.requestCount,
-        errorRate: this.errorCount / this.requestCount,
-        totalRequests: this.requestCount,
-      });
-    }
-  }
-};
 
 // System prompt and boundary detection
 const SYSTEM = `You are an inline autocomplete engine.
@@ -155,31 +110,14 @@ const SYSTEM = `You are an inline autocomplete engine.
 const BOUNDARY = /[\s\n\r\t,.;:!?…，。？！、）\)\]\}]/;
 
 export async function POST(request: NextRequest) {
-  const startTime = Date.now();
-  
   try {
-    // Rate limiting check
-    const clientIP = request.ip || 'unknown';
-    const rateLimitResult = checkRateLimit(clientIP);
-    
-    if (!rateLimitResult.allowed) {
-      return NextResponse.json(
-        { error: 'Rate limited', type: 'RATE_LIMITED' },
-        { 
-          status: 429,
-          headers: { 'Retry-After': rateLimitResult.retryAfter?.toString() || '60' }
-        }
-      );
-    }
-
-    // Input validation
+    // Basic input validation
     const body = await request.json();
     const validation = RequestSchema.safeParse(body);
     
     if (!validation.success) {
-      metrics.record(Date.now() - startTime, false);
       return NextResponse.json(
-        { error: validation.error.errors[0].message, type: 'INVALID_INPUT' },
+        { error: 'Invalid input', type: 'INVALID_INPUT' },
         { status: 400 }
       );
     }
@@ -222,7 +160,6 @@ export async function POST(request: NextRequest) {
       output = output.replace(/^\s+/, '').trim();
       
       clearTimeout(timeoutId);
-      metrics.record(Date.now() - startTime, true);
       
       return NextResponse.json({ 
         tail: output,
@@ -233,7 +170,6 @@ export async function POST(request: NextRequest) {
       clearTimeout(timeoutId);
       
       if (controller.signal.aborted) {
-        metrics.record(Date.now() - startTime, false);
         return NextResponse.json(
           { error: 'Request timeout', type: 'SERVICE_UNAVAILABLE' },
           { status: 408 }
@@ -241,8 +177,6 @@ export async function POST(request: NextRequest) {
       }
       
       console.error('AI completion failed:', aiError);
-      metrics.record(Date.now() - startTime, false);
-      
       return NextResponse.json(
         { error: 'AI service unavailable', type: 'SERVICE_UNAVAILABLE' },
         { status: 503 }
@@ -251,8 +185,6 @@ export async function POST(request: NextRequest) {
     
   } catch (error) {
     console.error('API route error:', error);
-    metrics.record(Date.now() - startTime, false);
-    
     return NextResponse.json(
       { error: 'Internal server error', type: 'SERVICE_UNAVAILABLE' },
       { status: 500 }
@@ -261,13 +193,12 @@ export async function POST(request: NextRequest) {
 }
 ```
 
-**Key Features:**
-- **Input Validation**: Zod schema with length and character validation
-- **Rate Limiting**: IP-based throttling with configurable limits
-- **Error Boundaries**: Comprehensive error handling with typed responses
-- **Performance Monitoring**: Basic metrics collection and logging
-- **Request Timeout**: 500ms hard timeout to meet latency requirements
+**Key Features for Demo:**
+- **Input Validation**: Basic Zod schema with length limits
+- **Error Boundaries**: Simple error handling with graceful degradation
+- **Request Timeout**: 500ms hard timeout for responsiveness
 - **Boundary Detection**: Multi-language punctuation support
+- **AI Integration**: Gemini 2.5 Flash-Lite with optimized settings
 
 **Complete Type Definitions:**
 ```typescript
@@ -655,7 +586,7 @@ export default function Page() {
 
 **Server Route Tests** (`__tests__/api/complete.test.ts`):
 ```typescript
-// Purpose: Verify API endpoint behavior and security
+// Purpose: Verify core API functionality
 describe('Completion API', () => {
   test('should enforce input validation', async () => {
     const response = await fetch('/api/complete', {
@@ -675,15 +606,15 @@ describe('Completion API', () => {
     expect(result.tail).toBe('hello'); // Stops at space
   });
   
-  test('should enforce rate limiting', async () => {
-    // Test 61 rapid requests from same IP
-    const requests = Array(61).fill(null).map(() => 
-      fetch('/api/complete', { method: 'POST', body: JSON.stringify({ left: 'test' }) })
+  test('should handle timeout gracefully', async () => {
+    // Mock slow AI response
+    const mockStream = jest.fn().mockImplementation(() => 
+      new Promise(resolve => setTimeout(resolve, 1000))
     );
+    jest.mocked(streamText).mockResolvedValue(mockStream);
     
-    const responses = await Promise.all(requests);
-    const lastResponse = responses[60];
-    expect(lastResponse.status).toBe(429);
+    const response = await POST({ json: () => ({ left: 'test' }) });
+    expect(response.status).toBe(408); // Timeout
   });
 });
 ```
@@ -877,15 +808,14 @@ test('should meet 200ms latency requirement', async () => {
 
 **Success Criteria**: Working autocomplete with <300ms P95 latency, no memory leaks
 
-### Phase 2: Production Readiness
+### Phase 2: Demo Enhancement
 - ✅ Comprehensive test suite (unit + integration)
 - ✅ Performance optimization (<200ms P50 latency target)
-- ✅ Security audit and input sanitization
-- ✅ Rate limiting implementation
-- ✅ Production environment configuration
-- ✅ Basic performance monitoring
+- ✅ Basic input validation
+- ✅ Error handling and graceful degradation
+- ✅ Code quality and documentation
 
-**Success Criteria**: Production-ready with comprehensive testing and monitoring
+**Success Criteria**: Demo-ready with comprehensive testing
 
 **Deferred Features** (Not needed for initial release):
 - ❌ Advanced configuration options (YAGNI)
@@ -894,79 +824,24 @@ test('should meet 200ms latency requirement', async () => {
 - ❌ Advanced accessibility features
 - ❌ Complex performance monitoring dashboard
 
-## Production Configuration
+## Demo Configuration
 
 ### Environment Variables
 ```bash
-# Required
+# Required for demo
 GOOGLE_AI_API_KEY=your_api_key_here
 
-# Optional with defaults
-API_RATE_LIMIT=60              # Requests per minute per IP
-COMPLETION_TIMEOUT=500         # Milliseconds
-CACHE_SIZE=50                  # Number of completions to cache
+# Optional demo settings
 DEBOUNCE_MS=120               # Debounce delay
 ```
 
-### Rate Limiting Strategy
+### Basic Error Handling
 ```typescript
-// Simple IP-based rate limiting
-const rateLimiter = new Map<string, { count: number; resetTime: number }>();
-
-const checkRateLimit = (ip: string): boolean => {
-  const now = Date.now();
-  const limit = parseInt(process.env.API_RATE_LIMIT || '60');
-  
-  const current = rateLimiter.get(ip);
-  if (!current || now > current.resetTime) {
-    rateLimiter.set(ip, { count: 1, resetTime: now + 60000 });
-    return true;
-  }
-  
-  if (current.count >= limit) {
-    return false;
-  }
-  
-  current.count++;
-  return true;
-};
-```
-
-### Deployment Configuration
-```typescript
-// next.config.js
-const nextConfig = {
-  experimental: {
-    runtime: 'edge', // Enable edge runtime for low latency
-  },
-  env: {
-    GOOGLE_AI_API_KEY: process.env.GOOGLE_AI_API_KEY,
-  },
-};
-```
-
-### Basic Monitoring
-```typescript
-// Simple performance tracking
-const metrics = {
-  requestCount: 0,
-  totalLatency: 0,
-  errorCount: 0,
-  
-  record(latency: number, success: boolean) {
-    this.requestCount++;
-    this.totalLatency += latency;
-    if (!success) this.errorCount++;
-    
-    // Log metrics every 100 requests
-    if (this.requestCount % 100 === 0) {
-      console.log({
-        avgLatency: this.totalLatency / this.requestCount,
-        errorRate: this.errorCount / this.requestCount,
-        totalRequests: this.requestCount,
-      });
-    }
-  }
+// Simple error boundaries for demo
+const handleApiError = (error: Error) => {
+  console.error('Autocomplete error:', error);
+  // Gracefully degrade - no suggestions shown
+  return null;
 };
 ```
 
