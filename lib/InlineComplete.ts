@@ -151,7 +151,7 @@ export const InlineComplete = Extension.create<InlineCompleteOptions>({
         success: false, 
         error: { 
           type: 'NETWORK_ERROR' as const, 
-          message: 'Not implemented', 
+          message: 'No completion function configured', 
           retryable: true 
         }
       }),
