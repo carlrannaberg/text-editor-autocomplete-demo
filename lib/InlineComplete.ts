@@ -107,12 +107,6 @@ class AutocompleteManager {
     if (process.env.NODE_ENV === 'development') {
       this.performanceMetrics.totalRequests++;
       if (isAtBoundary) this.performanceMetrics.wordBoundaryOptimizations++;
-      
-      // Log optimization rate every 20 requests
-      if (this.performanceMetrics.totalRequests % 20 === 0) {
-        const rate = (this.performanceMetrics.wordBoundaryOptimizations / this.performanceMetrics.totalRequests * 100).toFixed(1);
-        console.log(`🚀 Autocomplete optimization: ${rate}% instant completions at word boundaries`);
-      }
     }
     
     this.debounceTimer = setTimeout(() => {
