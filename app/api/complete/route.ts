@@ -37,8 +37,11 @@ export async function POST(request: NextRequest) {
     const timeoutId = setTimeout(() => controller.abort(), 500);
 
     try {
+      // Use model from environment or default to spec's model
+      const modelName = process.env.GEMINI_MODEL || 'gemini-2.5-flash-lite';
+      
       const { textStream } = await streamText({
-        model: google('gemini-1.5-flash'),
+        model: google(modelName),
         system: SYSTEM,
         prompt: left,
         temperature: 0.1,

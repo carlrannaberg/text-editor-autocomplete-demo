@@ -1,0 +1,764 @@
+{
+  "metadata": {
+    "version": 1,
+    "root": "/Users/carl/Development/agents/text-editor-autocomplete-demo",
+    "createdAt": "2025-08-29T10:59:41.981Z",
+    "updatedAt": "2025-08-29T10:59:41.981Z",
+    "totalFiles": 15
+  },
+  "tree": {
+    "name": "text-editor-autocomplete-demo",
+    "type": "dir",
+    "children": [
+      {
+        "name": "__tests__",
+        "type": "dir",
+        "children": [
+          {
+            "name": "api",
+            "type": "dir",
+            "children": [
+              {
+                "name": "complete.test.ts",
+                "type": "file"
+              }
+            ]
+          },
+          {
+            "name": "components",
+            "type": "dir",
+            "children": [
+              {
+                "name": "AutocompleteEditor.test.tsx",
+                "type": "file"
+              }
+            ]
+          },
+          {
+            "name": "lib",
+            "type": "dir",
+            "children": [
+              {
+                "name": "InlineComplete.test.ts",
+                "type": "file"
+              }
+            ]
+          },
+          {
+            "name": "utils",
+            "type": "dir",
+            "children": [
+              {
+                "name": "test-helpers.ts",
+                "type": "file"
+              }
+            ]
+          },
+          {
+            "name": "setup.test.ts",
+            "type": "file"
+          }
+        ]
+      },
+      {
+        "name": "app",
+        "type": "dir",
+        "children": [
+          {
+            "name": "api",
+            "type": "dir",
+            "children": [
+              {
+                "name": "complete",
+                "type": "dir",
+                "children": [
+                  {
+                    "name": "route.ts",
+                    "type": "file"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "layout.tsx",
+            "type": "file"
+          },
+          {
+            "name": "page.tsx",
+            "type": "file"
+          }
+        ]
+      },
+      {
+        "name": "lib",
+        "type": "dir",
+        "children": [
+          {
+            "name": "InlineComplete.ts",
+            "type": "file"
+          },
+          {
+            "name": "types.ts",
+            "type": "file"
+          }
+        ]
+      },
+      {
+        "name": "jest.config.js",
+        "type": "file"
+      },
+      {
+        "name": "jest.setup.js",
+        "type": "file"
+      },
+      {
+        "name": "next.config.js",
+        "type": "file"
+      },
+      {
+        "name": "postcss.config.js",
+        "type": "file"
+      },
+      {
+        "name": "tailwind.config.js",
+        "type": "file"
+      }
+    ]
+  },
+  "nodes": [
+    "__tests__/api/complete.test.ts",
+    "__tests__/components/AutocompleteEditor.test.tsx",
+    "__tests__/lib/InlineComplete.test.ts",
+    "__tests__/setup.test.ts",
+    "__tests__/utils/test-helpers.ts",
+    "app/api/complete/route.ts",
+    "app/layout.tsx",
+    "app/page.tsx",
+    "jest.config.js",
+    "jest.setup.js",
+    "lib/InlineComplete.ts",
+    "lib/types.ts",
+    "next.config.js",
+    "postcss.config.js",
+    "tailwind.config.js"
+  ],
+  "edges": [
+    {
+      "from": "__tests__/setup.test.ts",
+      "to": "__tests__/utils/test-helpers.ts"
+    },
+    {
+      "from": "lib/InlineComplete.ts",
+      "to": "lib/types.ts"
+    }
+  ],
+  "files": {
+    "__tests__/api/complete.test.ts": {
+      "imports": [
+        {
+          "from": "@/app/api/complete/route",
+          "kind": "import",
+          "imported": [
+            "POST"
+          ]
+        },
+        {
+          "from": "ai",
+          "kind": "import",
+          "imported": [
+            "streamText"
+          ]
+        },
+        {
+          "from": "next/server",
+          "kind": "import",
+          "imported": [
+            "NextRequest"
+          ]
+        }
+      ],
+      "dependencies": [],
+      "functions": [
+        {
+          "name": "createMockRequest",
+          "params": [
+            {
+              "name": "body",
+              "type": "object"
+            }
+          ],
+          "isAsync": false,
+          "isExported": false,
+          "returnType": "NextRequest"
+        }
+      ],
+      "classes": [],
+      "constants": [
+        {
+          "name": "mockStreamText",
+          "initKind": "unknown",
+          "isExported": false
+        }
+      ]
+    },
+    "__tests__/components/AutocompleteEditor.test.tsx": {
+      "imports": [
+        {
+          "from": "@testing-library/jest-dom",
+          "kind": "import"
+        },
+        {
+          "from": "@testing-library/react",
+          "kind": "import",
+          "imported": [
+            "render",
+            "screen"
+          ]
+        },
+        {
+          "from": "@/app/page",
+          "kind": "import",
+          "isDefault": true
+        },
+        {
+          "from": "@tiptap/react",
+          "kind": "import",
+          "imported": [
+            "useEditor"
+          ]
+        }
+      ],
+      "dependencies": [],
+      "functions": [],
+      "classes": [],
+      "constants": [
+        {
+          "name": "mockUseEditor",
+          "initKind": "unknown",
+          "isExported": false
+        }
+      ]
+    },
+    "__tests__/lib/InlineComplete.test.ts": {
+      "imports": [
+        {
+          "from": "@/lib/InlineComplete",
+          "kind": "import",
+          "imported": [
+            "InlineComplete",
+            "pluginKey"
+          ]
+        }
+      ],
+      "dependencies": [],
+      "functions": [],
+      "classes": [],
+      "constants": []
+    },
+    "__tests__/setup.test.ts": {
+      "imports": [
+        {
+          "from": "@testing-library/jest-dom",
+          "kind": "import"
+        },
+        {
+          "from": "react",
+          "kind": "import",
+          "isDefault": true
+        },
+        {
+          "from": "./utils/test-helpers",
+          "kind": "import",
+          "imported": [
+            "render",
+            "screen"
+          ]
+        },
+        {
+          "from": "./utils/test-helpers",
+          "kind": "import",
+          "imported": [
+            "mockApiResponse",
+            "createTestView"
+          ]
+        }
+      ],
+      "dependencies": [
+        "__tests__/utils/test-helpers.ts"
+      ],
+      "functions": [],
+      "classes": [],
+      "constants": []
+    },
+    "__tests__/utils/test-helpers.ts": {
+      "imports": [
+        {
+          "from": "@testing-library/react",
+          "kind": "import",
+          "imported": [
+            "render",
+            "RenderOptions"
+          ]
+        },
+        {
+          "from": "react",
+          "kind": "import",
+          "imported": [
+            "ReactElement"
+          ]
+        },
+        {
+          "from": "@testing-library/react",
+          "kind": "export"
+        }
+      ],
+      "dependencies": [],
+      "functions": [],
+      "classes": [],
+      "constants": [
+        {
+          "name": "customRender",
+          "initKind": "function",
+          "isExported": false
+        },
+        {
+          "name": "mockApiResponse",
+          "initKind": "function",
+          "isExported": true
+        },
+        {
+          "name": "mockApiError",
+          "initKind": "function",
+          "isExported": true
+        },
+        {
+          "name": "createTestView",
+          "initKind": "function",
+          "isExported": true
+        },
+        {
+          "name": "createTestViewWithSuggestion",
+          "initKind": "function",
+          "isExported": true
+        }
+      ]
+    },
+    "app/api/complete/route.ts": {
+      "imports": [
+        {
+          "from": "next/server",
+          "kind": "import",
+          "imported": [
+            "NextRequest",
+            "NextResponse"
+          ]
+        },
+        {
+          "from": "ai",
+          "kind": "import",
+          "imported": [
+            "streamText"
+          ]
+        },
+        {
+          "from": "@ai-sdk/google",
+          "kind": "import",
+          "imported": [
+            "google"
+          ]
+        },
+        {
+          "from": "zod",
+          "kind": "import",
+          "imported": [
+            "z"
+          ]
+        }
+      ],
+      "dependencies": [],
+      "functions": [
+        {
+          "name": "POST",
+          "params": [
+            {
+              "name": "request",
+              "type": "NextRequest"
+            }
+          ],
+          "isAsync": true,
+          "isExported": true
+        }
+      ],
+      "classes": [],
+      "constants": [
+        {
+          "name": "RequestSchema",
+          "initKind": "unknown",
+          "isExported": false
+        },
+        {
+          "name": "SYSTEM",
+          "initKind": "unknown",
+          "isExported": false
+        },
+        {
+          "name": "BOUNDARY",
+          "initKind": "unknown",
+          "isExported": false
+        }
+      ]
+    },
+    "app/layout.tsx": {
+      "imports": [
+        {
+          "from": "next",
+          "kind": "import",
+          "imported": [
+            "Metadata"
+          ]
+        },
+        {
+          "from": "next/font/google",
+          "kind": "import",
+          "imported": [
+            "Inter"
+          ]
+        },
+        {
+          "from": "./globals.css",
+          "kind": "import"
+        }
+      ],
+      "dependencies": [],
+      "functions": [
+        {
+          "name": "RootLayout",
+          "params": [
+            {
+              "name": "unknown",
+              "type": "{\n  children: React.ReactNode;\n}"
+            }
+          ],
+          "isAsync": false,
+          "isExported": true
+        }
+      ],
+      "classes": [],
+      "constants": [
+        {
+          "name": "inter",
+          "initKind": "unknown",
+          "isExported": false
+        },
+        {
+          "name": "metadata",
+          "initKind": "object",
+          "isExported": true,
+          "type": "Metadata"
+        },
+        {
+          "name": "viewport",
+          "initKind": "object",
+          "isExported": true
+        }
+      ]
+    },
+    "app/page.tsx": {
+      "imports": [
+        {
+          "from": "react",
+          "kind": "import",
+          "isDefault": true,
+          "imported": [
+            "useCallback",
+            "useEffect",
+            "useRef"
+          ]
+        },
+        {
+          "from": "@tiptap/react",
+          "kind": "import",
+          "imported": [
+            "useEditor",
+            "EditorContent"
+          ]
+        },
+        {
+          "from": "@tiptap/starter-kit",
+          "kind": "import",
+          "isDefault": true
+        },
+        {
+          "from": "@/lib/InlineComplete",
+          "kind": "import",
+          "imported": [
+            "InlineComplete"
+          ]
+        },
+        {
+          "from": "@/lib/types",
+          "kind": "import",
+          "imported": [
+            "ApiResponse"
+          ]
+        }
+      ],
+      "dependencies": [],
+      "functions": [
+        {
+          "name": "Page",
+          "params": [],
+          "isAsync": false,
+          "isExported": true
+        }
+      ],
+      "classes": [
+        {
+          "name": "AutocompleteErrorBoundary",
+          "isExported": false,
+          "methods": [
+            {
+              "name": "getDerivedStateFromError",
+              "params": [
+                {
+                  "name": "error",
+                  "type": "Error"
+                }
+              ],
+              "isAsync": false,
+              "isStatic": true
+            },
+            {
+              "name": "componentDidCatch",
+              "params": [
+                {
+                  "name": "error",
+                  "type": "Error"
+                },
+                {
+                  "name": "errorInfo",
+                  "type": "React.ErrorInfo"
+                }
+              ],
+              "isAsync": false
+            },
+            {
+              "name": "render",
+              "params": [],
+              "isAsync": false
+            }
+          ],
+          "properties": [],
+          "extends": "React.Component"
+        }
+      ],
+      "constants": [
+        {
+          "name": "AutocompleteEditor",
+          "initKind": "function",
+          "isExported": false,
+          "type": "React.FC"
+        }
+      ]
+    },
+    "jest.config.js": {
+      "imports": [],
+      "dependencies": [],
+      "functions": [],
+      "classes": [],
+      "constants": [
+        {
+          "name": "nextJest",
+          "initKind": "unknown",
+          "isExported": false
+        },
+        {
+          "name": "createJestConfig",
+          "initKind": "unknown",
+          "isExported": false
+        },
+        {
+          "name": "customJestConfig",
+          "initKind": "object",
+          "isExported": false
+        }
+      ]
+    },
+    "jest.setup.js": {
+      "imports": [
+        {
+          "from": "@testing-library/jest-dom",
+          "kind": "import"
+        }
+      ],
+      "dependencies": [],
+      "functions": [],
+      "classes": [],
+      "constants": [
+        {
+          "name": "originalError",
+          "initKind": "unknown",
+          "isExported": false
+        }
+      ]
+    },
+    "lib/InlineComplete.ts": {
+      "imports": [
+        {
+          "from": "@tiptap/core",
+          "kind": "import",
+          "imported": [
+            "Extension"
+          ]
+        },
+        {
+          "from": "prosemirror-state",
+          "kind": "import",
+          "imported": [
+            "Plugin",
+            "PluginKey"
+          ]
+        },
+        {
+          "from": "prosemirror-view",
+          "kind": "import",
+          "imported": [
+            "Decoration",
+            "DecorationSet",
+            "EditorView"
+          ]
+        },
+        {
+          "from": "./types",
+          "kind": "import",
+          "imported": [
+            "InlineCompleteOptions",
+            "InlineCompleteState",
+            "ApiResponse",
+            "CompletionText"
+          ]
+        }
+      ],
+      "dependencies": [
+        "lib/types.ts"
+      ],
+      "functions": [],
+      "classes": [
+        {
+          "name": "AutocompleteManager",
+          "isExported": false,
+          "methods": [
+            {
+              "name": "cleanup",
+              "params": [],
+              "isAsync": false
+            },
+            {
+              "name": "fetchCompletion",
+              "params": [
+                {
+                  "name": "text",
+                  "type": "string"
+                }
+              ],
+              "isAsync": true,
+              "returnType": "Promise<ApiResponse>"
+            },
+            {
+              "name": "debounceCompletion",
+              "params": [
+                {
+                  "name": "fn",
+                  "type": "() => void"
+                },
+                {
+                  "name": "delay",
+                  "type": "number"
+                }
+              ],
+              "isAsync": false
+            }
+          ],
+          "properties": [
+            {
+              "name": "abortController",
+              "type": "AbortController",
+              "isPrivate": true
+            },
+            {
+              "name": "debounceTimer",
+              "type": "NodeJS.Timeout | undefined",
+              "isPrivate": true
+            },
+            {
+              "name": "cache",
+              "isPrivate": true
+            },
+            {
+              "name": "maxCacheSize",
+              "isPrivate": true,
+              "isReadonly": true
+            }
+          ]
+        }
+      ],
+      "constants": [
+        {
+          "name": "scheduleCompletion",
+          "initKind": "function",
+          "isExported": false
+        },
+        {
+          "name": "pluginKey",
+          "initKind": "unknown",
+          "isExported": false
+        },
+        {
+          "name": "InlineComplete",
+          "initKind": "unknown",
+          "isExported": true
+        },
+        {
+          "name": "createInlineCompletePlugin",
+          "initKind": "function",
+          "isExported": false
+        }
+      ]
+    },
+    "lib/types.ts": {
+      "imports": [],
+      "dependencies": [],
+      "functions": [],
+      "classes": [],
+      "constants": []
+    },
+    "next.config.js": {
+      "imports": [],
+      "dependencies": [],
+      "functions": [],
+      "classes": [],
+      "constants": [
+        {
+          "name": "nextConfig",
+          "initKind": "object",
+          "isExported": false
+        }
+      ]
+    },
+    "postcss.config.js": {
+      "imports": [],
+      "dependencies": [],
+      "functions": [],
+      "classes": [],
+      "constants": []
+    },
+    "tailwind.config.js": {
+      "imports": [],
+      "dependencies": [],
+      "functions": [],
+      "classes": [],
+      "constants": []
+    }
+  }
+}

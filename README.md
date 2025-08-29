@@ -10,7 +10,19 @@ Create a `.env.local` file in the root directory with the following:
 
 ```
 GOOGLE_AI_API_KEY=your_api_key_here
+# Optional: Override the default model (defaults to gemini-2.5-flash-lite)
+# GEMINI_MODEL=gemini-2.5-flash
 ```
+
+### Available Models
+
+The implementation defaults to `gemini-2.5-flash-lite` for optimal speed (<200ms latency). You can override this with any supported model:
+
+- `gemini-2.5-flash-lite` - Fastest, optimized for inline completions (default)
+- `gemini-2.5-flash` - Fast with higher quality
+- `gemini-2.5-pro` - Most capable but slower
+- `gemini-1.5-flash` - Previous generation fast model
+- `gemini-1.5-flash-8b` - Lightweight variant
 
 ### Installation
 
