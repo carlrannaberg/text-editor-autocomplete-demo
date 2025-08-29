@@ -16,7 +16,7 @@ function maybePrefixSpace(left: string, suggestion: string): string {
   const punctNeedsSpace = /[\.,!?;:]/;
   if (!punctNeedsSpace.test(last)) return suggestion;
   // do not add if suggestion starts with whitespace or punctuation
-  if (/^[\s\p{P}]/u.test(suggestion)) return suggestion;
+  if (/^[\s\.,!?\-;:'"()[\]{}]/.test(suggestion)) return suggestion;
   // avoid space for likely CJK suggestion (no inter-word spaces)
   if (/^[\u4E00-\u9FFF\u3040-\u30FF]/.test(suggestion)) return suggestion;
   return ' ' + suggestion;
