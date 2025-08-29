@@ -8,7 +8,7 @@ jest.mock('ai', () => ({
   streamText: jest.fn(),
 }));
 
-const mockStreamText = streamText as jest.MockedFunction<typeof streamText>;
+const mockStreamText = streamText as jest.Mock;
 
 // Helper to create NextRequest-like objects for testing
 function createMockRequest(body: object): NextRequest {

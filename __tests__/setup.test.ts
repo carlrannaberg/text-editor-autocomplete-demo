@@ -3,6 +3,7 @@
  * Basic test to verify Jest and testing setup is working correctly
  */
 
+import '@testing-library/jest-dom';
 import React from 'react';
 import { render, screen } from './utils/test-helpers';
 import { mockApiResponse, createTestView } from './utils/test-helpers';
