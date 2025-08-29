@@ -21,8 +21,6 @@ The implementation defaults to `gemini-2.5-flash-lite` for optimal speed (<200ms
 - `gemini-2.5-flash-lite` - Fastest, optimized for inline completions (default)
 - `gemini-2.5-flash` - Fast with higher quality
 - `gemini-2.5-pro` - Most capable but slower
-- `gemini-1.5-flash` - Previous generation fast model
-- `gemini-1.5-flash-8b` - Lightweight variant
 
 ### Installation
 
