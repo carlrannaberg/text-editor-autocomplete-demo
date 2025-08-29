@@ -4,6 +4,24 @@ import { Plugin, PluginKey } from 'prosemirror-state';
 import { Decoration, DecorationSet, EditorView } from 'prosemirror-view';
 import { InlineCompleteOptions, InlineCompleteState, ApiResponse, CompletionText } from './types';
 
+// Heuristic: when at punctuation boundary with no space, prefix a space
+function maybePrefixSpace(left: string, suggestion: string): string {
+  if (!suggestion) return suggestion;
+  if (!left) return suggestion;
+
+  const last = left[left.length - 1] || '';
+  // already spaced
+  if (/\s/.test(last)) return suggestion;
+  // only for common ASCII sentence/token punctuation
+  const punctNeedsSpace = /[\.,!?;:]/;
+  if (!punctNeedsSpace.test(last)) return suggestion;
+  // do not add if suggestion starts with whitespace or punctuation
+  if (/^[\s\p{P}]/u.test(suggestion)) return suggestion;
+  // avoid space for likely CJK suggestion (no inter-word spaces)
+  if (/^[\u4E00-\u9FFF\u3040-\u30FF]/.test(suggestion)) return suggestion;
+  return ' ' + suggestion;
+}
+
 // AutocompleteManager class for resource management and caching
 class AutocompleteManager {
   private abortController?: AbortController;
@@ -185,9 +203,10 @@ const scheduleCompletion = (
     const result = await manager.fetchCompletion(left);
     
     if (result.success && result.data.tail) {
+      const adjusted = maybePrefixSpace(left, result.data.tail);
       view.dispatch(
         view.state.tr.setMeta(pluginKey, {
-          suggestion: result.data.tail,
+          suggestion: adjusted,
           isLoading: false,
           confidence: result.data.confidence
         })
