@@ -2,8 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Import ghost text styling */
-@import '../styles/globals.css';
+/* Import editor-specific styling */
+@import '../styles/editor.css';
 
 :root {
   --background: #ffffff;
