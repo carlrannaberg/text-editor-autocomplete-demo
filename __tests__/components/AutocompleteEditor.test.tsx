@@ -16,6 +16,45 @@ jest.mock('@tiptap/react', () => ({
 
 const mockUseEditor = useEditor as jest.Mock;
 
+const createMockEditor = () => {
+  // Create a proper chained commands mock
+  const createChainedCommands = () => ({
+    focus: () => createChainedCommands(),
+    toggleBold: () => createChainedCommands(),
+    toggleItalic: () => createChainedCommands(),
+    toggleStrike: () => createChainedCommands(),
+    toggleHeading: (params?: { level: 1 | 2 | 3 | 4 | 5 | 6 }) => createChainedCommands(),
+    setParagraph: () => createChainedCommands(),
+    toggleBulletList: () => createChainedCommands(),
+    toggleOrderedList: () => createChainedCommands(),
+    toggleBlockquote: () => createChainedCommands(),
+    run: jest.fn().mockReturnValue(true)
+  });
+
+  // Create can() mock that returns chainable commands
+  const createCanChain = () => ({
+    focus: () => createCanChain(),
+    toggleBold: () => createCanChain(),
+    toggleItalic: () => createCanChain(),
+    toggleStrike: () => createCanChain(),
+    toggleHeading: (params?: { level: 1 | 2 | 3 | 4 | 5 | 6 }) => createCanChain(),
+    setParagraph: () => createCanChain(),
+    toggleBulletList: () => createCanChain(),
+    toggleOrderedList: () => createCanChain(),
+    toggleBlockquote: () => createCanChain(),
+    run: jest.fn().mockReturnValue(true)
+  });
+
+  return {
+    destroy: jest.fn(),
+    can: jest.fn().mockReturnValue({
+      chain: () => createCanChain()
+    }),
+    chain: jest.fn().mockReturnValue(createChainedCommands()),
+    isActive: jest.fn().mockReturnValue(false)
+  };
+};
+
 describe('AutocompleteEditor', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -34,9 +73,7 @@ describe('AutocompleteEditor', () => {
   });
 
   test('should render editor when ready', () => {
-    const mockEditor = {
-      destroy: jest.fn(),
-    };
+    const mockEditor = createMockEditor();
     mockUseEditor.mockReturnValue(mockEditor);
 
     render(<Page />);
@@ -46,7 +83,7 @@ describe('AutocompleteEditor', () => {
   });
 
   test('should display keyboard shortcuts', () => {
-    const mockEditor = { destroy: jest.fn() };
+    const mockEditor = createMockEditor();
     mockUseEditor.mockReturnValue(mockEditor);
 
     render(<Page />);
@@ -56,7 +93,7 @@ describe('AutocompleteEditor', () => {
   });
 
   test('should configure editor with proper options', () => {
-    const mockEditor = { destroy: jest.fn() };
+    const mockEditor = createMockEditor();
     mockUseEditor.mockReturnValue(mockEditor);
 
     render(<Page />);
@@ -66,9 +103,9 @@ describe('AutocompleteEditor', () => {
         extensions: expect.any(Array),
         content: '',
         autofocus: 'end',
+        immediatelyRender: false,
         editorProps: expect.objectContaining({
           attributes: expect.objectContaining({
-            class: 'prose prose-lg prose-gray max-w-none focus:outline-none',
             'data-placeholder': 'Start typing to see AI autocomplete suggestions...',
             spellcheck: 'false'
           })
@@ -79,7 +116,7 @@ describe('AutocompleteEditor', () => {
   });
 
   test('should have editor content area', () => {
-    const mockEditor = { destroy: jest.fn() };
+    const mockEditor = createMockEditor();
     mockUseEditor.mockReturnValue(mockEditor);
 
     render(<Page />);

@@ -7,7 +7,7 @@ const nextConfig = {
     ignoreDuringBuilds: false, // Strict ESLint checking
   },
   env: {
-    GOOGLE_AI_API_KEY: process.env.GOOGLE_AI_API_KEY,
+    GOOGLE_GENERATIVE_AI_API_KEY: process.env.GOOGLE_GENERATIVE_AI_API_KEY,
   },
 };
 

@@ -1,9 +1,115 @@
 'use client';
 import React, { useCallback, useEffect, useRef } from 'react';
-import { useEditor, EditorContent } from '@tiptap/react';
+import { useEditor, EditorContent, Editor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { InlineComplete } from '@/lib/InlineComplete';
 import { ApiResponse } from '@/lib/types';
+
+const MenuBar = ({ editor }: { editor: Editor | null }) => {
+  if (!editor) {
+    return null;
+  }
+
+  return (
+    <div className="border-b border-gray-200 p-2 flex flex-wrap gap-1 bg-gray-50">
+      <button
+        onClick={() => editor.chain().focus().toggleBold().run()}
+        disabled={!editor.can().chain().focus().toggleBold().run()}
+        className={`px-3 py-1.5 text-sm rounded transition-colors ${
+          editor.isActive('bold')
+            ? 'bg-blue-100 text-blue-700 border border-blue-200'
+            : 'hover:bg-gray-100 border border-transparent'
+        }`}
+      >
+        <strong>B</strong>
+      </button>
+      <button
+        onClick={() => editor.chain().focus().toggleItalic().run()}
+        disabled={!editor.can().chain().focus().toggleItalic().run()}
+        className={`px-3 py-1.5 text-sm rounded transition-colors ${
+          editor.isActive('italic')
+            ? 'bg-blue-100 text-blue-700 border border-blue-200'
+            : 'hover:bg-gray-100 border border-transparent'
+        }`}
+      >
+        <em>I</em>
+      </button>
+      <button
+        onClick={() => editor.chain().focus().toggleStrike().run()}
+        disabled={!editor.can().chain().focus().toggleStrike().run()}
+        className={`px-3 py-1.5 text-sm rounded transition-colors ${
+          editor.isActive('strike')
+            ? 'bg-blue-100 text-blue-700 border border-blue-200'
+            : 'hover:bg-gray-100 border border-transparent'
+        }`}
+      >
+        <s>S</s>
+      </button>
+      <div className="w-px h-6 bg-gray-300 mx-1 self-center"></div>
+      <button
+        onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+        className={`px-3 py-1.5 text-sm rounded transition-colors ${
+          editor.isActive('heading', { level: 1 })
+            ? 'bg-blue-100 text-blue-700 border border-blue-200'
+            : 'hover:bg-gray-100 border border-transparent'
+        }`}
+      >
+        H1
+      </button>
+      <button
+        onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+        className={`px-3 py-1.5 text-sm rounded transition-colors ${
+          editor.isActive('heading', { level: 2 })
+            ? 'bg-blue-100 text-blue-700 border border-blue-200'
+            : 'hover:bg-gray-100 border border-transparent'
+        }`}
+      >
+        H2
+      </button>
+      <button
+        onClick={() => editor.chain().focus().setParagraph().run()}
+        className={`px-3 py-1.5 text-sm rounded transition-colors ${
+          editor.isActive('paragraph')
+            ? 'bg-blue-100 text-blue-700 border border-blue-200'
+            : 'hover:bg-gray-100 border border-transparent'
+        }`}
+      >
+        P
+      </button>
+      <div className="w-px h-6 bg-gray-300 mx-1 self-center"></div>
+      <button
+        onClick={() => editor.chain().focus().toggleBulletList().run()}
+        className={`px-3 py-1.5 text-sm rounded transition-colors ${
+          editor.isActive('bulletList')
+            ? 'bg-blue-100 text-blue-700 border border-blue-200'
+            : 'hover:bg-gray-100 border border-transparent'
+        }`}
+      >
+        • List
+      </button>
+      <button
+        onClick={() => editor.chain().focus().toggleOrderedList().run()}
+        className={`px-3 py-1.5 text-sm rounded transition-colors ${
+          editor.isActive('orderedList')
+            ? 'bg-blue-100 text-blue-700 border border-blue-200'
+            : 'hover:bg-gray-100 border border-transparent'
+        }`}
+      >
+        1. List
+      </button>
+      <button
+        onClick={() => editor.chain().focus().toggleBlockquote().run()}
+        className={`px-3 py-1.5 text-sm rounded transition-colors ${
+          editor.isActive('blockquote')
+            ? 'bg-blue-100 text-blue-700 border border-blue-200'
+            : 'hover:bg-gray-100 border border-transparent'
+        }`}
+      >
+        ❝ Quote
+      </button>
+    </div>
+  );
+};
 
 const AutocompleteEditor: React.FC = () => {
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -51,7 +157,6 @@ const AutocompleteEditor: React.FC = () => {
     immediatelyRender: false,
     editorProps: {
       attributes: {
-        class: 'prose prose-lg prose-gray max-w-none focus:outline-none',
         'data-placeholder': 'Start typing to see AI autocomplete suggestions...',
         spellcheck: 'false',
       },
@@ -83,6 +188,7 @@ const AutocompleteEditor: React.FC = () => {
         </div>
         
         <div className="editor-container mb-6">
+          <MenuBar editor={editor} />
           <EditorContent editor={editor} className="editor-content" />
         </div>
         
