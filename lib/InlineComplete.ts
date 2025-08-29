@@ -81,14 +81,53 @@ class AutocompleteManager {
     }
   }
 
-  debounceCompletion(fn: () => void, delay: number) {
+  private performanceMetrics = {
+    totalRequests: 0,
+    wordBoundaryOptimizations: 0,
+  };
+
+  debounceCompletion(fn: () => void, text: string, baseDelay: number) {
     if (this.debounceTimer) {
       clearTimeout(this.debounceTimer);
     }
+    
+    // Simplified adaptive logic: instant at word boundaries, normal delay otherwise
+    const isAtBoundary = this.isAtWordBoundary(text);
+    const delay = isAtBoundary ? 0 : baseDelay;
+    
+    // Track performance metrics in development
+    if (process.env.NODE_ENV === 'development') {
+      this.performanceMetrics.totalRequests++;
+      if (isAtBoundary) this.performanceMetrics.wordBoundaryOptimizations++;
+      
+      // Log optimization rate every 20 requests
+      if (this.performanceMetrics.totalRequests % 20 === 0) {
+        const rate = (this.performanceMetrics.wordBoundaryOptimizations / this.performanceMetrics.totalRequests * 100).toFixed(1);
+        console.log(`🚀 Autocomplete optimization: ${rate}% instant completions at word boundaries`);
+      }
+    }
+    
     this.debounceTimer = setTimeout(() => {
       fn();
       this.debounceTimer = undefined;
     }, delay) as NodeJS.Timeout;
+  }
+
+  private isAtWordBoundary(text: string): boolean {
+    if (text.length === 0) return true;
+    
+    const lastChar = text[text.length - 1] || '';
+    const secondLastChar = text.length > 1 ? text[text.length - 2] || '' : '';
+    
+    // Word boundary patterns
+    const boundaryChars = /[\s\n\r\t,.;:!?…，。？！、）\)\]\}]/;
+    const wordChars = /[a-zA-Z0-9]/;
+    
+    // At boundary if:
+    // 1. Last character is whitespace/punctuation
+    // 2. Transition from word to non-word character
+    return boundaryChars.test(lastChar) || 
+           (wordChars.test(secondLastChar) && !wordChars.test(lastChar));
   }
 }
 
@@ -99,6 +138,11 @@ const scheduleCompletion = (
   pluginKey: PluginKey<InlineCompleteState>,
   options: InlineCompleteOptions
 ) => {
+  // Get current text first for adaptive debouncing
+  const { state } = view;
+  const { from } = state.selection;
+  const left = state.doc.textBetween(0, from, '\n', '\n');
+  
   manager.debounceCompletion(async () => {
     if (view.composing) return; // IME safety
     
@@ -135,7 +179,7 @@ const scheduleCompletion = (
         })
       );
     }
-  }, options.debounceMs || 120);
+  }, left, options.debounceMs || 120);
 };
 
 // Plugin key for state management

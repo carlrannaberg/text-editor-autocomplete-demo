@@ -46,21 +46,43 @@ export async function POST(request: NextRequest) {
         prompt: left,
         temperature: 0.1,
         topP: 0.9,
-        stopSequences: ['\n', '```'],
+        stopSequences: ['\n', ' ', '.', '?', '!'],
         maxRetries: 1,
         abortSignal: controller.signal,
       });
 
-      // Stream processing with boundary detection
+      // Stream processing with boundary detection and token limiting
       let output = '';
+      const maxTokens = 8; // Hard limit to reduce compute time
+      const maxChars = 32; // Character limit backup
+      
       for await (const delta of textStream) {
-        output += delta;
+        const potentialOutput = output + delta;
+        
+        // Check character limit first
+        if (potentialOutput.length > maxChars) {
+          // Only take what fits within the limit
+          output = potentialOutput.slice(0, maxChars);
+          break;
+        }
+        
+        // Check token limit (rough estimation: 4 chars per token)
+        const tokenCount = Math.ceil(potentialOutput.length / 4);
+        if (tokenCount >= maxTokens) {
+          // Only take what fits within token limit
+          const maxAllowedChars = maxTokens * 4;
+          output = potentialOutput.slice(0, maxAllowedChars);
+          break;
+        }
+        
+        output = potentialOutput;
+        
+        // Check for boundary markers
         const boundaryMatch = output.match(BOUNDARY);
         if (boundaryMatch) {
           output = output.slice(0, boundaryMatch.index!);
           break;
         }
-        if (output.length > 40) break; // Hard cap
       }
 
       // Clean output

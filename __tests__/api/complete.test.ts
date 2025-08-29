@@ -102,10 +102,10 @@ describe('Completion API', () => {
     expect(body.type).toBe('SERVICE_UNAVAILABLE');
   });
 
-  test('should enforce 40 character hard cap', async () => {
+  test('should enforce 32 character hard cap', async () => {
     // Mock AI response with very long text
     const mockTextStream = async function* (): AsyncGenerator<string, void, unknown> {
-      yield 'this is a very long response that should be cut off at forty characters';
+      yield 'this is a very long response that should be cut off at thirty two characters';
     };
 
     mockStreamText.mockResolvedValue({
@@ -117,7 +117,7 @@ describe('Completion API', () => {
     const response = await POST(request);
     const result = await response.json();
 
-    expect(result.tail.length).toBeLessThanOrEqual(40);
+    expect(result.tail.length).toBeLessThanOrEqual(32);
   });
 
   test('should return non-empty completions', async () => {
