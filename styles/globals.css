@@ -1,0 +1,38 @@
+/* Ghost text styling for AI autocomplete */
+.ghost-suggestion {
+  opacity: 0.35;
+  pointer-events: none;
+  white-space: pre;
+  color: #6b7280; /* Subtle gray */
+}
+
+/* Additional Tailwind customizations for the editor */
+.editor-container {
+  @apply border border-gray-300 rounded-lg p-4 min-h-[200px] focus-within:border-blue-500;
+}
+
+.editor-content {
+  @apply prose prose-gray max-w-none;
+}
+
+/* Dark mode support for ghost text */
+@media (prefers-color-scheme: dark) {
+  .ghost-suggestion {
+    color: #9ca3af;
+    opacity: 0.4;
+  }
+}
+
+/* Loading state for suggestions */
+.ghost-suggestion.loading {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}

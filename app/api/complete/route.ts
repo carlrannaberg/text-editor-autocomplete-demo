@@ -1,0 +1,97 @@
+// app/api/complete/route.ts
+import { NextRequest, NextResponse } from 'next/server';
+import { streamText } from 'ai';
+import { google } from '@ai-sdk/google';
+import { z } from 'zod';
+
+// Basic input validation for demo
+const RequestSchema = z.object({
+  left: z.string().min(1).max(1000) // Simplified validation
+});
+
+// System prompt and boundary detection
+const SYSTEM = `You are an inline autocomplete engine.
+- Output ONLY the minimal continuation of the user's text.
+- No introductions, no sentences, no punctuation unless it is literally the next character.
+- Never add quotes/formatting; no trailing whitespace.`;
+
+const BOUNDARY = /[\s\n\r\t,.;:!?…，。？！、）\)\]\}]/;
+
+export async function POST(request: NextRequest) {
+  try {
+    // Basic input validation
+    const body = await request.json();
+    const validation = RequestSchema.safeParse(body);
+    
+    if (!validation.success) {
+      return NextResponse.json(
+        { error: 'Invalid input', type: 'INVALID_INPUT' },
+        { status: 400 }
+      );
+    }
+
+    const { left } = validation.data;
+
+    // AI completion with timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 500);
+
+    try {
+      const { textStream } = await streamText({
+        model: google('gemini-1.5-flash'),
+        system: SYSTEM,
+        prompt: left,
+        temperature: 0.1,
+        topP: 0.9,
+        stopSequences: ['\n', '```'],
+        maxRetries: 1,
+        abortSignal: controller.signal,
+      });
+
+      // Stream processing with boundary detection
+      let output = '';
+      for await (const delta of textStream) {
+        output += delta;
+        const boundaryMatch = output.match(BOUNDARY);
+        if (boundaryMatch) {
+          output = output.slice(0, boundaryMatch.index!);
+          break;
+        }
+        if (output.length > 40) break; // Hard cap
+      }
+
+      // Clean output
+      output = output.replace(/^\s+/, '').trim();
+      
+      clearTimeout(timeoutId);
+      
+      return NextResponse.json({ 
+        tail: output,
+        confidence: output.length > 0 ? 0.8 : 0.0
+      });
+      
+    } catch (aiError) {
+      clearTimeout(timeoutId);
+      
+      if (controller.signal.aborted) {
+        return NextResponse.json(
+          { error: 'Request timeout', type: 'SERVICE_UNAVAILABLE' },
+          { status: 408 }
+        );
+      }
+      
+      console.error('AI completion failed:', aiError);
+      return NextResponse.json(
+        { error: 'AI service unavailable', type: 'SERVICE_UNAVAILABLE' },
+        { status: 503 }
+      );
+    }
+    
+  } catch (error) {
+    console.error('API route error:', error);
+    return NextResponse.json(
+      { error: 'Internal server error', type: 'SERVICE_UNAVAILABLE' },
+      { status: 500 }
+    );
+  }
+}
