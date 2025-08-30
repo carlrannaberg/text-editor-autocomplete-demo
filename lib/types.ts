@@ -4,6 +4,33 @@
 export type ValidatedText = string;
 export type CompletionText = string;
 
+// Context-related types
+export type DocumentType = 'email' | 'article' | 'note' | 'other';
+export type Language = 'en' | 'es' | 'fr' | 'de';
+export type Tone = 'neutral' | 'formal' | 'casual' | 'persuasive';
+
+/**
+ * State interface for completion context
+ */
+export interface CompletionContextState {
+  contextText: string;
+  documentType?: DocumentType;
+  language?: Language;
+  tone?: Tone;
+  audience?: string;
+  keywords?: string[];
+}
+
+/**
+ * Extended context interface with methods
+ */
+export interface CompletionContextValue extends CompletionContextState {
+  updateContext: (updates: Partial<CompletionContextState>) => void;
+  clearContext: () => void;
+  getContextHash: () => Promise<string>;
+  getTokenCount: () => number;
+}
+
 /**
  * Request interface for AI completion with validation
  * @interface CompletionRequest
@@ -16,9 +43,9 @@ export interface CompletionRequest {
   /** Additional context to improve completion quality */
   context?: {
     /** Type of document being edited */
-    documentType?: 'email' | 'article' | 'note' | 'other';
+    documentType?: DocumentType;
     /** Language for completion generation */
-    language?: 'en' | 'es' | 'fr' | 'de';
+    language?: Language;
   };
 }
 
@@ -47,6 +74,13 @@ export type CompletionError =
   | { type: 'CONTENT_FILTERED'; message: string; retryable: false };
 
 /**
+ * Context operation error types for structured error handling
+ */
+export type ContextError = 
+  | { type: 'CRYPTO_UNAVAILABLE'; message: string; fallbackUsed: true }
+  | { type: 'STORAGE_ERROR'; message: string; operation: 'save' | 'load' };
+
+/**
  * Union type for API responses handling both success and error cases
  * Provides type-safe error handling with discriminated unions
  */
@@ -62,6 +96,8 @@ export type ApiResponse =
 export interface InlineCompleteOptions {
   /** Function to fetch completion tail for given input (optional - uses built-in API if not provided) */
   fetchTail?: (left: string) => Promise<ApiResponse>;
+  /** Function to get current completion context (optional) */
+  getContext?: () => CompletionContextState | null;
   /** Debounce delay in milliseconds before triggering completion */
   debounceMs?: number;
   /** Maximum length of prefix text to send for completion */

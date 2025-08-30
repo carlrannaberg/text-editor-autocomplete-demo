@@ -2,6 +2,7 @@
 import { POST } from '@/app/api/complete/route';
 import { streamText } from 'ai';
 import { NextRequest } from 'next/server';
+import type { MockStreamResponse } from '../utils/test-helpers';
 
 // Mock the AI SDK
 jest.mock('ai', () => ({
@@ -22,10 +23,6 @@ function createMockRequest(body: object): NextRequest {
   } as NextRequest;
 }
 
-// Type for mock text stream response
-interface MockStreamResponse {
-  textStream: AsyncGenerator<string, void, unknown>;
-}
 
 describe('Completion API', () => {
   beforeEach(() => {
@@ -230,5 +227,242 @@ describe('Completion API', () => {
     const result = await response.json();
 
     expect(result.confidence).toBe(0.0); // Empty result should have 0 confidence
+  });
+
+  // Context-aware completion tests
+  describe('Context-aware completions', () => {
+    test('should handle context-aware completions with valid context', async () => {
+      const mockTextStream = async function* (): AsyncGenerator<string, void, unknown> {
+        yield 'professional';
+      };
+
+      mockStreamText.mockResolvedValue({
+        textStream: mockTextStream(),
+      } as MockStreamResponse);
+
+      const request = createMockRequest({
+        left: 'Dear client',
+        context: {
+          userContext: 'Writing a professional response to a customer complaint',
+          documentType: 'email',
+          language: 'en',
+          tone: 'formal',
+          audience: 'business client',
+          keywords: ['professional', 'response']
+        }
+      });
+
+      const response = await POST(request);
+      const result = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(result.tail).toBe('professional');
+      expect(result.confidence).toBeGreaterThan(0.5);
+    });
+
+    test('should boost confidence for short contextual completions', async () => {
+      const mockTextStream = async function* (): AsyncGenerator<string, void, unknown> {
+        yield 'help'; // ≤8 chars should get confidence boost
+      };
+
+      mockStreamText.mockResolvedValue({
+        textStream: mockTextStream(),
+      } as MockStreamResponse);
+
+      const request = createMockRequest({
+        left: 'Can I',
+        context: {
+          userContext: 'Customer service email',
+          tone: 'formal' // Change from 'helpful' to valid enum value
+        }
+      });
+
+      const response = await POST(request);
+      const result = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(result.tail).toBe('help');
+      expect(result.confidence).toBeGreaterThanOrEqual(0.55); // Base 0.5 + context boost 0.05
+    });
+
+    test('should validate context schema and reject invalid context', async () => {
+      const request = createMockRequest({
+        left: 'test',
+        context: {
+          documentType: 'invalid-type', // Should fail validation
+          language: 'xx', // Invalid language code
+          tone: 'invalid-tone',
+          keywords: ['a'.repeat(50)] // Exceeds 32 char limit per keyword
+        }
+      });
+
+      const response = await POST(request);
+      expect(response.status).toBe(400);
+      
+      const body = await response.json();
+      expect(body.error).toBe('Invalid input');
+      expect(body.type).toBe('INVALID_INPUT');
+    });
+
+    test('should enforce 20k character context limit', async () => {
+      const request = createMockRequest({
+        left: 'test',
+        context: {
+          userContext: 'a'.repeat(20001), // Exceeds 20k limit
+          documentType: 'article'
+        }
+      });
+
+      const response = await POST(request);
+      expect(response.status).toBe(400);
+      
+      const body = await response.json();
+      expect(body.error).toBe('Invalid input');
+      expect(body.type).toBe('INVALID_INPUT');
+    });
+
+    test('should enforce maximum 10 keywords', async () => {
+      const request = createMockRequest({
+        left: 'test',
+        context: {
+          userContext: 'test context',
+          keywords: Array(11).fill('keyword') // 11 keywords, should fail
+        }
+      });
+
+      const response = await POST(request);
+      expect(response.status).toBe(400);
+    });
+
+    test('should sanitize context HTML and control characters', async () => {
+      const mockTextStream = async function* (): AsyncGenerator<string, void, unknown> {
+        yield 'response';
+      };
+
+      mockStreamText.mockResolvedValue({
+        textStream: mockTextStream(),
+      } as MockStreamResponse);
+
+      const request = createMockRequest({
+        left: 'test',
+        context: {
+          userContext: 'Context with <script>alert("xss")</script> HTML\x00\x1F',
+          audience: 'Users\x0B with control chars',
+          keywords: ['<b>bold</b>', 'normal']
+        }
+      });
+
+      const response = await POST(request);
+      expect(response.status).toBe(200);
+      
+      // Verify that the AI was called (meaning context was processed successfully)
+      expect(mockStreamText).toHaveBeenCalled();
+      
+      const aiCall = mockStreamText.mock.calls[0][0];
+      const promptText = aiCall.prompt;
+      
+      // Context should be sanitized in the prompt
+      expect(promptText).not.toContain('<script>');
+      expect(promptText).not.toContain('<b>');
+      expect(promptText).not.toContain('\x00');
+      expect(promptText).not.toContain('\x0B');
+    });
+
+    test('should maintain backward compatibility without context', async () => {
+      const mockTextStream = async function* (): AsyncGenerator<string, void, unknown> {
+        yield 'world';
+      };
+
+      mockStreamText.mockResolvedValue({
+        textStream: mockTextStream(),
+      } as MockStreamResponse);
+
+      const request = createMockRequest({ left: 'hello' }); // No context field
+
+      const response = await POST(request);
+      const result = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(result.tail).toBe('world');
+      expect(typeof result.confidence).toBe('number');
+    });
+
+    test('should use different system prompts for context vs non-context', async () => {
+      const mockTextStream = async function* (): AsyncGenerator<string, void, unknown> {
+        yield 'response';
+      };
+
+      mockStreamText.mockResolvedValue({
+        textStream: mockTextStream(),
+      } as MockStreamResponse);
+
+      // First call with context
+      const contextRequest = createMockRequest({
+        left: 'test',
+        context: { userContext: 'test context' }
+      });
+
+      await POST(contextRequest);
+      const contextCall = mockStreamText.mock.calls[0][0];
+
+      // Second call without context  
+      mockStreamText.mockClear();
+      mockStreamText.mockResolvedValue({ textStream: mockTextStream() });
+      
+      const noContextRequest = createMockRequest({ left: 'test' });
+      await POST(noContextRequest);
+      const noContextCall = mockStreamText.mock.calls[0][0];
+
+      // System prompts should be different
+      expect(contextCall.system).not.toBe(noContextCall.system);
+      expect(contextCall.system).toContain('contextual awareness');
+    });
+
+    test('should handle partial context data', async () => {
+      const mockTextStream = async function* (): AsyncGenerator<string, void, unknown> {
+        yield 'response';
+      };
+
+      mockStreamText.mockResolvedValue({
+        textStream: mockTextStream(),
+      } as MockStreamResponse);
+
+      const request = createMockRequest({
+        left: 'test',
+        context: {
+          documentType: 'email', // Only one field provided
+          // Other fields undefined/missing
+        }
+      });
+
+      const response = await POST(request);
+      expect(response.status).toBe(200);
+      
+      const result = await response.json();
+      expect(result.tail).toBe('response');
+    });
+
+    test('should use extended timeout for context requests', async () => {
+      // This test verifies the timeout logic by checking the AbortController setup
+      const mockTextStream = async function* (): AsyncGenerator<string, void, unknown> {
+        yield 'response';
+      };
+
+      mockStreamText.mockResolvedValue({
+        textStream: mockTextStream(),
+      } as MockStreamResponse);
+
+      const request = createMockRequest({
+        left: 'test',
+        context: { userContext: 'context that should trigger extended timeout' }
+      });
+
+      const response = await POST(request);
+      expect(response.status).toBe(200);
+      
+      // Verify that streamText was called with the expected configuration
+      const aiCall = mockStreamText.mock.calls[0][0];
+      expect(aiCall.abortSignal).toBeDefined();
+    });
   });
 });

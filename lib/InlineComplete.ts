@@ -2,7 +2,7 @@
 import { Extension } from '@tiptap/core';
 import { Plugin, PluginKey } from 'prosemirror-state';
 import { Decoration, DecorationSet, EditorView } from 'prosemirror-view';
-import { InlineCompleteOptions, InlineCompleteState, ApiResponse, CompletionText } from './types';
+import { InlineCompleteOptions, InlineCompleteState, ApiResponse, CompletionText, CompletionContextState } from './types';
 
 // Heuristic: when at punctuation boundary with no space, prefix a space
 function maybePrefixSpace(left: string, suggestion: string): string {
@@ -22,45 +22,70 @@ function maybePrefixSpace(left: string, suggestion: string): string {
   return ' ' + suggestion;
 }
 
-// AutocompleteManager class for resource management and caching
-class AutocompleteManager {
-  private abortController?: AbortController;
-  private debounceTimer?: NodeJS.Timeout | undefined;
-  private cache = new Map<string, CompletionText>();
-  private readonly maxCacheSize = 50;
-  private cacheHits = new Map<string, number>();
+// Context-aware fetch function type
+type ContextAwareFetchTail = (left: string, context?: CompletionContextState) => Promise<ApiResponse>;
 
-  cleanup() {
-    this.abortController?.abort();
-    if (this.debounceTimer) {
-      clearTimeout(this.debounceTimer);
-      this.debounceTimer = undefined;
+// Context normalization for cache keys
+const normalizeContext = (context?: CompletionContextState) => {
+  if (!context) return '';
+  
+  return JSON.stringify({
+    contextText: context.contextText?.trim() || '',
+    documentType: context.documentType || '',
+    language: context.language || '',
+    tone: context.tone || '',
+    audience: context.audience?.trim() || '',
+    keywords: context.keywords?.sort().join(',') || ''
+  });
+};
+
+// Generate cache key with context hash
+const generateCacheKey = async (text: string, context?: CompletionContextState): Promise<string> => {
+  const contextStr = normalizeContext(context);
+  if (!contextStr) return text; // No context, use simple text key
+  
+  try {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(contextStr);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const contextHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 8);
+    return `${text}:${contextHash}`;
+  } catch (error) {
+    console.warn('Failed to generate context hash for cache key:', error);
+    // Fallback to simple hash
+    let hash = 0;
+    for (let i = 0; i < contextStr.length; i++) {
+      const char = contextStr.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash;
     }
+    return `${text}:${Math.abs(hash).toString(16).slice(0, 8)}`;
   }
+};
 
-  async fetchCompletion(text: string): Promise<ApiResponse> {
-    this.cleanup(); // Cancel previous requests
-    
-    // Check cache first (true LRU: refresh recency on get)
-    const cached = this.cache.get(text);
-    if (cached) {
-      // refresh recency
-      this.cache.delete(text);
-      this.cache.set(text, cached);
-      const hits = (this.cacheHits.get(text) || 0) + 1;
-      this.cacheHits.set(text, hits);
-      const localConfidence = Math.max(0.5, Math.min(0.9, 0.5 + 0.05 * hits));
-      return { success: true, data: { tail: cached, confidence: Number(localConfidence.toFixed(2)) } };
-    }
-
-    this.abortController = new AbortController();
+// Create context-aware fetchTail function
+export const createContextAwareFetchTail = (getContext?: () => CompletionContextState | null): ContextAwareFetchTail => {
+  return async (left: string, explicitContext?: CompletionContextState): Promise<ApiResponse> => {
+    // Use explicit context if provided, otherwise get from context provider
+    const context = explicitContext || getContext?.() || undefined;
     
     try {
       const response = await fetch('/api/complete', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ left: text }),
-        signal: this.abortController.signal,
+        body: JSON.stringify({ 
+          left,
+          context: context && context.contextText?.trim() ? {
+            userContext: context.contextText.trim(),
+            documentType: context.documentType || 'other',
+            language: context.language || 'en',
+            tone: context.tone || 'neutral',
+            audience: context.audience?.trim() || '',
+            keywords: context.keywords || []
+          } : undefined
+        }),
+        signal: new AbortController().signal, // Individual request controllers are managed by AutocompleteManager
       });
 
       if (!response.ok) {
@@ -87,18 +112,113 @@ class AutocompleteManager {
       }
 
       const result = await response.json();
+      return { success: true, data: result };
+    } catch (error) {
+      if ((error as Error).name === 'AbortError') {
+        return { success: false, error: { type: 'NETWORK_ERROR', message: 'Request cancelled', retryable: true } };
+      }
+      return { success: false, error: { type: 'NETWORK_ERROR', message: 'Network failure', retryable: true } };
+    }
+  };
+};
+
+// AutocompleteManager class for resource management and caching
+class AutocompleteManager {
+  private abortController?: AbortController;
+  private debounceTimer?: NodeJS.Timeout | undefined;
+  private cache = new Map<string, CompletionText>();
+  private readonly maxCacheSize = 50;
+  private cacheHits = new Map<string, number>();
+  private contextAwareFetchTail: ContextAwareFetchTail | undefined;
+
+  constructor(contextAwareFetchTail?: ContextAwareFetchTail) {
+    this.contextAwareFetchTail = contextAwareFetchTail;
+  }
+
+  cleanup() {
+    this.abortController?.abort();
+    if (this.debounceTimer) {
+      clearTimeout(this.debounceTimer);
+      this.debounceTimer = undefined;
+    }
+  }
+
+  async fetchCompletion(text: string, context?: CompletionContextState): Promise<ApiResponse> {
+    this.cleanup(); // Cancel previous requests
+    
+    // Generate context-aware cache key
+    const cacheKey = await generateCacheKey(text, context);
+    
+    // Check cache first (true LRU: refresh recency on get)
+    const cached = this.cache.get(cacheKey);
+    if (cached) {
+      // refresh recency
+      this.cache.delete(cacheKey);
+      this.cache.set(cacheKey, cached);
+      const hits = (this.cacheHits.get(cacheKey) || 0) + 1;
+      this.cacheHits.set(cacheKey, hits);
+      const localConfidence = Math.max(0.5, Math.min(0.9, 0.5 + 0.05 * hits));
+      return { success: true, data: { tail: cached, confidence: Number(localConfidence.toFixed(2)) } };
+    }
+
+    this.abortController = new AbortController();
+    
+    try {
+      // Use context-aware fetch if available, otherwise fallback to default behavior
+      let result: ApiResponse;
+      
+      if (this.contextAwareFetchTail) {
+        result = await this.contextAwareFetchTail(text, context);
+      } else {
+        // Fallback to original implementation
+        const response = await fetch('/api/complete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ left: text }),
+          signal: this.abortController.signal,
+        });
+
+        if (!response.ok) {
+          if (response.status === 429) {
+            return {
+              success: false,
+              error: {
+                type: 'RATE_LIMITED',
+                message: `API error: ${response.status}`,
+                retryable: true,
+                retryAfter: 5
+              }
+            };
+          } else {
+            return {
+              success: false,
+              error: {
+                type: 'SERVICE_UNAVAILABLE',
+                message: `API error: ${response.status}`,
+                retryable: true
+              }
+            };
+          }
+        }
+
+        const responseData = await response.json();
+        result = { success: true, data: responseData };
+      }
       
       // Cache successful result with LRU eviction
-      if (this.cache.size >= this.maxCacheSize) {
-        const firstKey = this.cache.keys().next().value;
-        if (firstKey !== undefined) {
-          this.cache.delete(firstKey);
+      if (result.success) {
+        if (this.cache.size >= this.maxCacheSize) {
+          const firstKey = this.cache.keys().next().value;
+          if (firstKey !== undefined) {
+            this.cache.delete(firstKey);
+            this.cacheHits.delete(firstKey);
+          }
         }
+        this.cache.set(cacheKey, result.data.tail);
+        this.cacheHits.set(cacheKey, 0);
       }
-      this.cache.set(text, result.tail);
-      this.cacheHits.set(text, 0);
       
-      return { success: true, data: result };
+      return result;
     } catch (error) {
       if ((error as Error).name === 'AbortError') {
         return { success: false, error: { type: 'NETWORK_ERROR', message: 'Request cancelled', retryable: true } };
@@ -156,7 +276,8 @@ const scheduleCompletion = (
   view: EditorView, 
   manager: AutocompleteManager, 
   pluginKey: PluginKey<InlineCompleteState>,
-  options: InlineCompleteOptions
+  options: InlineCompleteOptions,
+  getContext?: () => CompletionContextState | null
 ) => {
   // Get current text first for adaptive debouncing
   const { state } = view;
@@ -200,7 +321,9 @@ const scheduleCompletion = (
       })
     );
 
-    const result = await manager.fetchCompletion(left);
+    // Get context for request
+    const context = getContext?.() || undefined;
+    const result = await manager.fetchCompletion(left, context);
     
     if (result.success && result.data.tail) {
       const adjusted = maybePrefixSpace(left, result.data.tail);
@@ -247,7 +370,9 @@ export const InlineComplete = Extension.create<InlineCompleteOptions>({
 
 // Plugin factory function
 const createInlineCompletePlugin = (options: InlineCompleteOptions) => {
-  const manager = new AutocompleteManager();
+  // Create context-aware fetch function if context provider is available
+  const contextAwareFetchTail = options.getContext ? createContextAwareFetchTail(options.getContext) : undefined;
+  const manager = new AutocompleteManager(contextAwareFetchTail);
   
   return new Plugin({
     key: pluginKey,
@@ -296,7 +421,7 @@ const createInlineCompletePlugin = (options: InlineCompleteOptions) => {
         }
         
         // Schedule completion with debouncing
-        scheduleCompletion(view, manager, pluginKey, options);
+        scheduleCompletion(view, manager, pluginKey, options, options.getContext);
         return false;
       },
       

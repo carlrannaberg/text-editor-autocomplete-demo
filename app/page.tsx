@@ -3,6 +3,8 @@ import React, { useEffect } from 'react';
 import { useEditor, EditorContent, Editor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { InlineComplete } from '@/lib/InlineComplete';
+import { useCompletionContext } from '@/lib/context/CompletionContext';
+import { ContextPanel } from '@/components/ContextPanel';
 
 const MenuButton = ({ 
   onClick,
@@ -103,6 +105,8 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
 };
 
 const AutocompleteEditor: React.FC = () => {
+  const completionContext = useCompletionContext();
+  
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -110,6 +114,7 @@ const AutocompleteEditor: React.FC = () => {
         debounceMs: 120,
         maxPrefixLength: 1000,
         enabled: true,
+        getContext: () => completionContext,
       }),
     ],
     content: '',
@@ -121,7 +126,7 @@ const AutocompleteEditor: React.FC = () => {
         spellcheck: 'false',
       },
     },
-  }, []); // Empty dependency array since using built-in manager
+  }, [completionContext]); // Include context in dependency array
 
   // Cleanup on unmount
   useEffect(() => {
@@ -145,6 +150,8 @@ const AutocompleteEditor: React.FC = () => {
           <h1 className="text-4xl font-bold text-gray-900 mb-3">AI Autocomplete Demo</h1>
           <p className="text-lg text-gray-600">Experience AI-powered writing assistance as you type</p>
         </div>
+        
+        <ContextPanel />
         
         <div className="editor-container mb-6">
           <MenuBar editor={editor} />

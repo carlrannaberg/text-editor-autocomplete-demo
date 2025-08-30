@@ -2,9 +2,9 @@
   "metadata": {
     "version": 1,
     "root": "/Users/carl/Development/agents/text-editor-autocomplete-demo",
-    "createdAt": "2025-08-29T10:59:41.981Z",
-    "updatedAt": "2025-08-29T10:59:41.981Z",
-    "totalFiles": 15
+    "createdAt": "2025-08-30T13:58:34.770Z",
+    "updatedAt": "2025-08-30T13:58:34.770Z",
+    "totalFiles": 19
   },
   "tree": {
     "name": "text-editor-autocomplete-demo",
@@ -31,6 +31,10 @@
               {
                 "name": "AutocompleteEditor.test.tsx",
                 "type": "file"
+              },
+              {
+                "name": "ContextPanel.test.tsx",
+                "type": "file"
               }
             ]
           },
@@ -38,6 +42,16 @@
             "name": "lib",
             "type": "dir",
             "children": [
+              {
+                "name": "context",
+                "type": "dir",
+                "children": [
+                  {
+                    "name": "CompletionContext.test.tsx",
+                    "type": "file"
+                  }
+                ]
+              },
               {
                 "name": "InlineComplete.test.ts",
                 "type": "file"
@@ -91,9 +105,29 @@
         ]
       },
       {
+        "name": "components",
+        "type": "dir",
+        "children": [
+          {
+            "name": "ContextPanel.tsx",
+            "type": "file"
+          }
+        ]
+      },
+      {
         "name": "lib",
         "type": "dir",
         "children": [
+          {
+            "name": "context",
+            "type": "dir",
+            "children": [
+              {
+                "name": "CompletionContext.tsx",
+                "type": "file"
+              }
+            ]
+          },
           {
             "name": "InlineComplete.ts",
             "type": "file"
@@ -129,15 +163,19 @@
   "nodes": [
     "__tests__/api/complete.test.ts",
     "__tests__/components/AutocompleteEditor.test.tsx",
+    "__tests__/components/ContextPanel.test.tsx",
     "__tests__/lib/InlineComplete.test.ts",
+    "__tests__/lib/context/CompletionContext.test.tsx",
     "__tests__/setup.test.ts",
     "__tests__/utils/test-helpers.ts",
     "app/api/complete/route.ts",
     "app/layout.tsx",
     "app/page.tsx",
+    "components/ContextPanel.tsx",
     "jest.config.js",
     "jest.setup.js",
     "lib/InlineComplete.ts",
+    "lib/context/CompletionContext.tsx",
     "lib/types.ts",
     "next.config.js",
     "postcss.config.js",
@@ -150,6 +188,10 @@
     },
     {
       "from": "lib/InlineComplete.ts",
+      "to": "lib/context/CompletionContext.tsx"
+    },
+    {
+      "from": "lib/InlineComplete.ts",
       "to": "lib/types.ts"
     }
   ],
@@ -158,49 +200,21 @@
       "imports": [
         {
           "from": "@/app/api/complete/route",
-          "kind": "import",
-          "imported": [
-            "POST"
-          ]
+          "kind": "import"
         },
         {
           "from": "ai",
-          "kind": "import",
-          "imported": [
-            "streamText"
-          ]
+          "kind": "import"
         },
         {
           "from": "next/server",
-          "kind": "import",
-          "imported": [
-            "NextRequest"
-          ]
+          "kind": "import"
         }
       ],
       "dependencies": [],
-      "functions": [
-        {
-          "name": "createMockRequest",
-          "params": [
-            {
-              "name": "body",
-              "type": "object"
-            }
-          ],
-          "isAsync": false,
-          "isExported": false,
-          "returnType": "NextRequest"
-        }
-      ],
+      "functions": [],
       "classes": [],
-      "constants": [
-        {
-          "name": "mockStreamText",
-          "initKind": "unknown",
-          "isExported": false
-        }
-      ]
+      "constants": []
     },
     "__tests__/components/AutocompleteEditor.test.tsx": {
       "imports": [
@@ -237,6 +251,64 @@
           "name": "mockUseEditor",
           "initKind": "unknown",
           "isExported": false
+        },
+        {
+          "name": "createMockEditor",
+          "initKind": "function",
+          "isExported": false
+        }
+      ]
+    },
+    "__tests__/components/ContextPanel.test.tsx": {
+      "imports": [
+        {
+          "from": "react",
+          "kind": "import",
+          "isDefault": true
+        },
+        {
+          "from": "@testing-library/react",
+          "kind": "import",
+          "imported": [
+            "render",
+            "screen",
+            "fireEvent",
+            "waitFor"
+          ]
+        },
+        {
+          "from": "@testing-library/user-event",
+          "kind": "import",
+          "isDefault": true
+        },
+        {
+          "from": "@/components/ContextPanel",
+          "kind": "import",
+          "imported": [
+            "ContextPanel"
+          ]
+        },
+        {
+          "from": "@/lib/context/CompletionContext",
+          "kind": "import",
+          "imported": [
+            "CompletionContextProvider"
+          ]
+        }
+      ],
+      "dependencies": [],
+      "functions": [],
+      "classes": [],
+      "constants": [
+        {
+          "name": "mockLocalStorage",
+          "initKind": "object",
+          "isExported": false
+        },
+        {
+          "name": "renderContextPanel",
+          "initKind": "function",
+          "isExported": false
         }
       ]
     },
@@ -255,6 +327,64 @@
       "functions": [],
       "classes": [],
       "constants": []
+    },
+    "__tests__/lib/context/CompletionContext.test.tsx": {
+      "imports": [
+        {
+          "from": "react",
+          "kind": "import",
+          "isDefault": true
+        },
+        {
+          "from": "@testing-library/react",
+          "kind": "import",
+          "imported": [
+            "render",
+            "screen",
+            "act"
+          ]
+        },
+        {
+          "from": "@testing-library/user-event",
+          "kind": "import",
+          "isDefault": true
+        },
+        {
+          "from": "@/lib/context/CompletionContext",
+          "kind": "import",
+          "imported": [
+            "CompletionContextProvider",
+            "useCompletionContext"
+          ]
+        },
+        {
+          "from": "@/lib/types",
+          "kind": "import",
+          "imported": [
+            "CompletionContextState"
+          ]
+        }
+      ],
+      "dependencies": [],
+      "functions": [],
+      "classes": [],
+      "constants": [
+        {
+          "name": "mockDigest",
+          "initKind": "unknown",
+          "isExported": false
+        },
+        {
+          "name": "mockLocalStorage",
+          "initKind": "object",
+          "isExported": false
+        },
+        {
+          "name": "TestContextComponent",
+          "initKind": "function",
+          "isExported": false
+        }
+      ]
     },
     "__tests__/setup.test.ts": {
       "imports": [
@@ -348,66 +478,25 @@
       "imports": [
         {
           "from": "next/server",
-          "kind": "import",
-          "imported": [
-            "NextRequest",
-            "NextResponse"
-          ]
+          "kind": "import"
         },
         {
           "from": "ai",
-          "kind": "import",
-          "imported": [
-            "streamText"
-          ]
+          "kind": "import"
         },
         {
           "from": "@ai-sdk/google",
-          "kind": "import",
-          "imported": [
-            "google"
-          ]
+          "kind": "import"
         },
         {
           "from": "zod",
-          "kind": "import",
-          "imported": [
-            "z"
-          ]
+          "kind": "import"
         }
       ],
       "dependencies": [],
-      "functions": [
-        {
-          "name": "POST",
-          "params": [
-            {
-              "name": "request",
-              "type": "NextRequest"
-            }
-          ],
-          "isAsync": true,
-          "isExported": true
-        }
-      ],
+      "functions": [],
       "classes": [],
-      "constants": [
-        {
-          "name": "RequestSchema",
-          "initKind": "unknown",
-          "isExported": false
-        },
-        {
-          "name": "SYSTEM",
-          "initKind": "unknown",
-          "isExported": false
-        },
-        {
-          "name": "BOUNDARY",
-          "initKind": "unknown",
-          "isExported": false
-        }
-      ]
+      "constants": []
     },
     "app/layout.tsx": {
       "imports": [
@@ -423,6 +512,13 @@
           "kind": "import",
           "imported": [
             "Inter"
+          ]
+        },
+        {
+          "from": "@/lib/context/CompletionContext",
+          "kind": "import",
+          "imported": [
+            "CompletionContextProvider"
           ]
         },
         {
@@ -471,9 +567,7 @@
           "kind": "import",
           "isDefault": true,
           "imported": [
-            "useCallback",
-            "useEffect",
-            "useRef"
+            "useEffect"
           ]
         },
         {
@@ -481,7 +575,8 @@
           "kind": "import",
           "imported": [
             "useEditor",
-            "EditorContent"
+            "EditorContent",
+            "Editor"
           ]
         },
         {
@@ -497,10 +592,17 @@
           ]
         },
         {
-          "from": "@/lib/types",
+          "from": "@/lib/context/CompletionContext",
           "kind": "import",
           "imported": [
-            "ApiResponse"
+            "useCompletionContext"
+          ]
+        },
+        {
+          "from": "@/components/ContextPanel",
+          "kind": "import",
+          "imported": [
+            "ContextPanel"
           ]
         }
       ],
@@ -555,10 +657,69 @@
       ],
       "constants": [
         {
+          "name": "MenuButton",
+          "initKind": "function",
+          "isExported": false
+        },
+        {
+          "name": "MenuSeparator",
+          "initKind": "function",
+          "isExported": false
+        },
+        {
+          "name": "MenuBar",
+          "initKind": "function",
+          "isExported": false
+        },
+        {
           "name": "AutocompleteEditor",
           "initKind": "function",
           "isExported": false,
           "type": "React.FC"
+        }
+      ]
+    },
+    "components/ContextPanel.tsx": {
+      "imports": [
+        {
+          "from": "react",
+          "kind": "import",
+          "isDefault": true,
+          "imported": [
+            "useState",
+            "useCallback",
+            "useEffect"
+          ]
+        },
+        {
+          "from": "@/lib/context/CompletionContext",
+          "kind": "import",
+          "imported": [
+            "useCompletionContext"
+          ]
+        },
+        {
+          "from": "@/lib/types",
+          "kind": "import",
+          "imported": [
+            "ContextError"
+          ]
+        }
+      ],
+      "dependencies": [],
+      "functions": [],
+      "classes": [],
+      "constants": [
+        {
+          "name": "handleUIError",
+          "initKind": "function",
+          "isExported": false
+        },
+        {
+          "name": "ContextPanel",
+          "initKind": "function",
+          "isExported": true,
+          "type": "React.FC<ContextPanelProps>"
         }
       ]
     },
@@ -607,122 +768,119 @@
       "imports": [
         {
           "from": "@tiptap/core",
-          "kind": "import",
-          "imported": [
-            "Extension"
-          ]
+          "kind": "import"
         },
         {
           "from": "prosemirror-state",
-          "kind": "import",
-          "imported": [
-            "Plugin",
-            "PluginKey"
-          ]
+          "kind": "import"
         },
         {
           "from": "prosemirror-view",
-          "kind": "import",
-          "imported": [
-            "Decoration",
-            "DecorationSet",
-            "EditorView"
-          ]
+          "kind": "import"
         },
         {
           "from": "./types",
-          "kind": "import",
-          "imported": [
-            "InlineCompleteOptions",
-            "InlineCompleteState",
-            "ApiResponse",
-            "CompletionText"
-          ]
+          "kind": "import"
+        },
+        {
+          "from": "./context/CompletionContext",
+          "kind": "import"
         }
       ],
       "dependencies": [
+        "lib/context/CompletionContext.tsx",
         "lib/types.ts"
       ],
       "functions": [],
-      "classes": [
+      "classes": [],
+      "constants": []
+    },
+    "lib/context/CompletionContext.tsx": {
+      "imports": [
         {
-          "name": "AutocompleteManager",
-          "isExported": false,
-          "methods": [
-            {
-              "name": "cleanup",
-              "params": [],
-              "isAsync": false
-            },
-            {
-              "name": "fetchCompletion",
-              "params": [
-                {
-                  "name": "text",
-                  "type": "string"
-                }
-              ],
-              "isAsync": true,
-              "returnType": "Promise<ApiResponse>"
-            },
-            {
-              "name": "debounceCompletion",
-              "params": [
-                {
-                  "name": "fn",
-                  "type": "() => void"
-                },
-                {
-                  "name": "delay",
-                  "type": "number"
-                }
-              ],
-              "isAsync": false
-            }
-          ],
-          "properties": [
-            {
-              "name": "abortController",
-              "type": "AbortController",
-              "isPrivate": true
-            },
-            {
-              "name": "debounceTimer",
-              "type": "NodeJS.Timeout | undefined",
-              "isPrivate": true
-            },
-            {
-              "name": "cache",
-              "isPrivate": true
-            },
-            {
-              "name": "maxCacheSize",
-              "isPrivate": true,
-              "isReadonly": true
-            }
+          "from": "react",
+          "kind": "import",
+          "isDefault": true,
+          "imported": [
+            "createContext",
+            "useContext",
+            "useState",
+            "useCallback",
+            "useEffect"
+          ]
+        },
+        {
+          "from": "@/lib/types",
+          "kind": "import",
+          "imported": [
+            "ContextError",
+            "CompletionContextState",
+            "CompletionContextValue",
+            "DocumentType",
+            "Language",
+            "Tone"
           ]
         }
       ],
+      "dependencies": [],
+      "functions": [],
+      "classes": [],
       "constants": [
         {
-          "name": "scheduleCompletion",
+          "name": "normalizeContext",
           "initKind": "function",
           "isExported": false
         },
         {
-          "name": "pluginKey",
+          "name": "handleContextError",
+          "initKind": "function",
+          "isExported": false
+        },
+        {
+          "name": "generateContextHash",
+          "initKind": "function",
+          "isExported": false
+        },
+        {
+          "name": "estimateTokenCount",
+          "initKind": "function",
+          "isExported": false
+        },
+        {
+          "name": "CONTEXT_STORAGE_KEY",
+          "initKind": "literal",
+          "isExported": false
+        },
+        {
+          "name": "saveToLocalStorage",
+          "initKind": "function",
+          "isExported": false
+        },
+        {
+          "name": "loadFromLocalStorage",
+          "initKind": "function",
+          "isExported": false
+        },
+        {
+          "name": "getDefaultContext",
+          "initKind": "function",
+          "isExported": false
+        },
+        {
+          "name": "CompletionContext",
           "initKind": "unknown",
           "isExported": false
         },
         {
-          "name": "InlineComplete",
-          "initKind": "unknown",
+          "name": "CompletionContextProvider",
+          "initKind": "function",
+          "isExported": true,
+          "type": "React.FC<{ children: React.ReactNode }>"
+        },
+        {
+          "name": "useCompletionContext",
+          "initKind": "function",
           "isExported": true
-        },
-        {
-          "name": "createInlineCompletePlugin",
-          "initKind": "function",
-          "isExported": false
         }
       ]
     },
