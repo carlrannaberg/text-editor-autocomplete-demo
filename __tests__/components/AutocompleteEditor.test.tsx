@@ -110,8 +110,7 @@ describe('AutocompleteEditor', () => {
             spellcheck: 'false'
           })
         })
-      }),
-      expect.any(Array)
+      })
     );
   });
 

@@ -126,7 +126,7 @@ const AutocompleteEditor: React.FC = () => {
         spellcheck: 'false',
       },
     },
-  }, [completionContext]); // Include context in dependency array
+  }); // Remove context dependency - getContext callback provides current context
 
   // Cleanup on unmount
   useEffect(() => {

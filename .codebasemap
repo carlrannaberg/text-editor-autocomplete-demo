@@ -2,8 +2,8 @@
   "metadata": {
     "version": 1,
     "root": "/Users/carl/Development/agents/text-editor-autocomplete-demo",
-    "createdAt": "2025-08-30T13:58:34.770Z",
-    "updatedAt": "2025-08-30T13:58:34.770Z",
+    "createdAt": "2025-08-30T15:18:35.317Z",
+    "updatedAt": "2025-08-30T15:18:35.317Z",
     "totalFiles": 19
   },
   "tree": {
@@ -63,7 +63,7 @@
             "type": "dir",
             "children": [
               {
-                "name": "test-helpers.ts",
+                "name": "test-helpers.tsx",
                 "type": "file"
               }
             ]
@@ -167,7 +167,7 @@
     "__tests__/lib/InlineComplete.test.ts",
     "__tests__/lib/context/CompletionContext.test.tsx",
     "__tests__/setup.test.ts",
-    "__tests__/utils/test-helpers.ts",
+    "__tests__/utils/test-helpers.tsx",
     "app/api/complete/route.ts",
     "app/layout.tsx",
     "app/page.tsx",
@@ -183,12 +183,24 @@
   ],
   "edges": [
     {
-      "from": "__tests__/setup.test.ts",
-      "to": "__tests__/utils/test-helpers.ts"
+      "from": "__tests__/api/complete.test.ts",
+      "to": "__tests__/utils/test-helpers.tsx"
     },
     {
-      "from": "lib/InlineComplete.ts",
-      "to": "lib/context/CompletionContext.tsx"
+      "from": "__tests__/components/AutocompleteEditor.test.tsx",
+      "to": "__tests__/utils/test-helpers.tsx"
+    },
+    {
+      "from": "__tests__/components/ContextPanel.test.tsx",
+      "to": "__tests__/utils/test-helpers.tsx"
+    },
+    {
+      "from": "__tests__/lib/context/CompletionContext.test.tsx",
+      "to": "__tests__/utils/test-helpers.tsx"
+    },
+    {
+      "from": "__tests__/setup.test.ts",
+      "to": "__tests__/utils/test-helpers.tsx"
     },
     {
       "from": "lib/InlineComplete.ts",
@@ -209,9 +221,15 @@
         {
           "from": "next/server",
           "kind": "import"
+        },
+        {
+          "from": "../utils/test-helpers",
+          "kind": "import"
         }
       ],
-      "dependencies": [],
+      "dependencies": [
+        "__tests__/utils/test-helpers.tsx"
+      ],
       "functions": [],
       "classes": [],
       "constants": []
@@ -223,7 +241,7 @@
           "kind": "import"
         },
         {
-          "from": "@testing-library/react",
+          "from": "../utils/test-helpers",
           "kind": "import",
           "imported": [
             "render",
@@ -243,7 +261,9 @@
           ]
         }
       ],
-      "dependencies": [],
+      "dependencies": [
+        "__tests__/utils/test-helpers.tsx"
+      ],
       "functions": [],
       "classes": [],
       "constants": [
@@ -267,13 +287,14 @@
           "isDefault": true
         },
         {
-          "from": "@testing-library/react",
+          "from": "../utils/test-helpers",
           "kind": "import",
           "imported": [
             "render",
             "screen",
             "fireEvent",
-            "waitFor"
+            "waitFor",
+            "setupMockLocalStorage"
           ]
         },
         {
@@ -287,22 +308,17 @@
           "imported": [
             "ContextPanel"
           ]
-        },
-        {
-          "from": "@/lib/context/CompletionContext",
-          "kind": "import",
-          "imported": [
-            "CompletionContextProvider"
-          ]
         }
       ],
-      "dependencies": [],
+      "dependencies": [
+        "__tests__/utils/test-helpers.tsx"
+      ],
       "functions": [],
       "classes": [],
       "constants": [
         {
           "name": "mockLocalStorage",
-          "initKind": "object",
+          "initKind": "unknown",
           "isExported": false
         },
         {
@@ -363,20 +379,25 @@
           "imported": [
             "CompletionContextState"
           ]
+        },
+        {
+          "from": "../../utils/test-helpers",
+          "kind": "import",
+          "imported": [
+            "setupMockCrypto",
+            "setupMockLocalStorage"
+          ]
         }
       ],
-      "dependencies": [],
+      "dependencies": [
+        "__tests__/utils/test-helpers.tsx"
+      ],
       "functions": [],
       "classes": [],
       "constants": [
         {
-          "name": "mockDigest",
-          "initKind": "unknown",
-          "isExported": false
-        },
-        {
           "name": "mockLocalStorage",
-          "initKind": "object",
+          "initKind": "unknown",
           "isExported": false
         },
         {
@@ -415,20 +436,22 @@
         }
       ],
       "dependencies": [
-        "__tests__/utils/test-helpers.ts"
+        "__tests__/utils/test-helpers.tsx"
       ],
       "functions": [],
       "classes": [],
       "constants": []
     },
-    "__tests__/utils/test-helpers.ts": {
+    "__tests__/utils/test-helpers.tsx": {
       "imports": [
         {
           "from": "@testing-library/react",
           "kind": "import",
           "imported": [
             "render",
-            "RenderOptions"
+            "RenderOptions",
+            "screen",
+            "waitFor"
           ]
         },
         {
@@ -436,6 +459,13 @@
           "kind": "import",
           "imported": [
             "ReactElement"
+          ]
+        },
+        {
+          "from": "@/lib/context/CompletionContext",
+          "kind": "import",
+          "imported": [
+            "CompletionContextProvider"
           ]
         },
         {
@@ -448,6 +478,11 @@
       "classes": [],
       "constants": [
         {
+          "name": "AllTheProviders",
+          "initKind": "function",
+          "isExported": false
+        },
+        {
           "name": "customRender",
           "initKind": "function",
           "isExported": false
@@ -459,6 +494,31 @@
         },
         {
           "name": "mockApiError",
+          "initKind": "function",
+          "isExported": true
+        },
+        {
+          "name": "setupMockLocalStorage",
+          "initKind": "function",
+          "isExported": true
+        },
+        {
+          "name": "setupMockCrypto",
+          "initKind": "function",
+          "isExported": true
+        },
+        {
+          "name": "waitForLoadingToFinish",
+          "initKind": "function",
+          "isExported": true
+        },
+        {
+          "name": "expectTokenCount",
+          "initKind": "function",
+          "isExported": true
+        },
+        {
+          "name": "createMockContextState",
           "initKind": "function",
           "isExported": true
         },
@@ -781,14 +841,9 @@
         {
           "from": "./types",
           "kind": "import"
-        },
-        {
-          "from": "./context/CompletionContext",
-          "kind": "import"
         }
       ],
       "dependencies": [
-        "lib/context/CompletionContext.tsx",
         "lib/types.ts"
       ],
       "functions": [],
