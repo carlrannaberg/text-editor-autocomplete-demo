@@ -110,12 +110,14 @@ describe('ErrorNotification', () => {
   });
 
 
-  it('should not auto-dismiss when autoDismissMs is 0', () => {
+  it('should not auto-dismiss when autoDismissMs is 0', async () => {
     const onDismiss = jest.fn();
     
     render(<ErrorNotification error={mockError} onDismiss={onDismiss} autoDismissMs={0} />);
     
-    // Should not auto-dismiss
+    // Wait longer than normal auto-dismiss time to verify no dismissal
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
     expect(onDismiss).not.toHaveBeenCalled();
   });
 

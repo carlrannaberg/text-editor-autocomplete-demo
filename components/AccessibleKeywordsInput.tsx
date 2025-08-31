@@ -39,6 +39,8 @@ export const AccessibleKeywordsInput: React.FC<AccessibleKeywordsInputProps> = (
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const keywordRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const focusTimeoutRef = useRef<NodeJS.Timeout>();
+  const blurTimeoutRef = useRef<NodeJS.Timeout>();
   
   const { 
     announceStatus, 
@@ -62,6 +64,18 @@ export const AccessibleKeywordsInput: React.FC<AccessibleKeywordsInputProps> = (
       }
     });
   }, [keywords, enhanceTargetSize]);
+
+  // Cleanup timers on unmount
+  useEffect(() => {
+    return () => {
+      if (focusTimeoutRef.current) {
+        clearTimeout(focusTimeoutRef.current);
+      }
+      if (blurTimeoutRef.current) {
+        clearTimeout(blurTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const addKeyword = useCallback(() => {
     const keyword = inputValue.trim();
@@ -103,7 +117,10 @@ export const AccessibleKeywordsInput: React.FC<AccessibleKeywordsInputProps> = (
     }
     
     // Focus next available keyword or input
-    setTimeout(() => {
+    if (focusTimeoutRef.current) {
+      clearTimeout(focusTimeoutRef.current);
+    }
+    focusTimeoutRef.current = setTimeout(() => {
       const nextIndex = Math.min(index, newKeywords.length - 1);
       if (nextIndex >= 0 && keywordRefs.current[nextIndex]) {
         keywordRefs.current[nextIndex]?.focus();
@@ -220,7 +237,10 @@ export const AccessibleKeywordsInput: React.FC<AccessibleKeywordsInputProps> = (
 
   const handleKeywordBlur = useCallback(() => {
     // Small delay to allow focus to move to another keyword
-    setTimeout(() => {
+    if (blurTimeoutRef.current) {
+      clearTimeout(blurTimeoutRef.current);
+    }
+    blurTimeoutRef.current = setTimeout(() => {
       if (!containerRef.current?.contains(document.activeElement)) {
         setFocusedKeywordIndex(-1);
       }

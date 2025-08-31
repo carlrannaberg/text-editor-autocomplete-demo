@@ -82,40 +82,35 @@ export const ErrorNotification: React.FC<ErrorNotificationProps> = ({
           container: 'bg-red-50 border-red-200 text-red-900',
           icon: '🚨',
           iconColor: 'text-red-600',
-          button: 'bg-red-600 hover:bg-red-700 text-white',
-          progress: 'bg-red-500'
+          button: 'bg-red-600 hover:bg-red-700 text-white'
         };
       case 'high':
         return {
           container: 'bg-red-50 border-red-200 text-red-800',
           icon: '❌',
           iconColor: 'text-red-500',
-          button: 'bg-red-600 hover:bg-red-700 text-white',
-          progress: 'bg-red-500'
+          button: 'bg-red-600 hover:bg-red-700 text-white'
         };
       case 'medium':
         return {
           container: 'bg-yellow-50 border-yellow-200 text-yellow-900',
           icon: '⚠️',
           iconColor: 'text-yellow-600',
-          button: 'bg-yellow-600 hover:bg-yellow-700 text-white',
-          progress: 'bg-yellow-500'
+          button: 'bg-yellow-600 hover:bg-yellow-700 text-white'
         };
       case 'low':
         return {
           container: 'bg-blue-50 border-blue-200 text-blue-900',
           icon: 'ℹ️',
           iconColor: 'text-blue-600',
-          button: 'bg-blue-600 hover:bg-blue-700 text-white',
-          progress: 'bg-blue-500'
+          button: 'bg-blue-600 hover:bg-blue-700 text-white'
         };
       default:
         return {
           container: 'bg-gray-50 border-gray-200 text-gray-900',
           icon: '⚪',
           iconColor: 'text-gray-600',
-          button: 'bg-gray-600 hover:bg-gray-700 text-white',
-          progress: 'bg-gray-500'
+          button: 'bg-gray-600 hover:bg-gray-700 text-white'
         };
     }
   };

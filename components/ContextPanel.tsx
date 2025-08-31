@@ -94,6 +94,7 @@ export const ContextPanel: React.FC<ContextPanelProps> = ({
   const contextTextareaRef = useRef<HTMLTextAreaElement>(null);
   const clearButtonRef = useRef<HTMLButtonElement>(null);
   const confirmClearButtonRef = useRef<HTMLButtonElement>(null);
+  const focusTimeoutRef = useRef<NodeJS.Timeout>();
   
   // Accessibility features
   const { 
@@ -152,7 +153,10 @@ export const ContextPanel: React.FC<ContextPanelProps> = ({
     if (contextText && contextText.trim()) {
       setShowConfirmDialog(true);
       // Focus the confirm button after a brief delay
-      setTimeout(() => {
+      if (focusTimeoutRef.current) {
+        clearTimeout(focusTimeoutRef.current);
+      }
+      focusTimeoutRef.current = setTimeout(() => {
         confirmClearButtonRef.current?.focus();
       }, 100);
     }
@@ -365,6 +369,15 @@ export const ContextPanel: React.FC<ContextPanelProps> = ({
     }
     prevWarningLevelRef.current = warningLevel;
   }, [warningLevel, tokenCount, announceTokenWarning]);
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (focusTimeoutRef.current) {
+        clearTimeout(focusTimeoutRef.current);
+      }
+    };
+  }, []);
   
   // High contrast styles
   const highContrastStyles = getHighContrastStyles();
