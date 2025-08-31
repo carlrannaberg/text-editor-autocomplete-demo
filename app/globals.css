@@ -20,4 +20,116 @@ body {
   .text-balance {
     text-wrap: balance;
   }
+  
+  /* Screen reader only content */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+  
+  /* Show when focused for skip links */
+  .sr-only.focus\:not-sr-only:focus,
+  .focus\:not-sr-only:focus.sr-only {
+    position: static;
+    width: auto;
+    height: auto;
+    padding: inherit;
+    margin: inherit;
+    overflow: visible;
+    clip: auto;
+    white-space: normal;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high), (forced-colors: active) {
+  .context-panel {
+    border: 2px solid WindowText !important;
+  }
+  
+  .context-panel button {
+    border: 1px solid WindowText !important;
+  }
+  
+  .context-panel input,
+  .context-panel select,
+  .context-panel textarea {
+    border: 1px solid WindowText !important;
+    background: Window !important;
+    color: WindowText !important;
+  }
+  
+  .context-panel input:focus,
+  .context-panel select:focus,
+  .context-panel textarea:focus {
+    outline: 2px solid Highlight !important;
+    outline-offset: 2px !important;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  /* Keep essential animations for accessibility feedback */
+  [aria-live],
+  [role="alert"],
+  [role="status"] {
+    animation: none !important;
+    transition: opacity 0.2s ease-in-out !important;
+  }
+}
+
+/* Focus indicators enhancement */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+a:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid #3b82f6 !important;
+  outline-offset: 2px !important;
+}
+
+/* Ensure minimum target size for touch accessibility */
+button,
+input[type="button"],
+input[type="submit"],
+input[type="reset"],
+a[role="button"] {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Skip link styling */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 6px;
+  background: #3b82f6;
+  color: white;
+  padding: 8px 16px;
+  text-decoration: none;
+  font-weight: 500;
+  border-radius: 4px;
+  z-index: 1000;
+  transition: top 0.2s ease-in-out;
+}
+
+.skip-link:focus {
+  top: 6px;
 }

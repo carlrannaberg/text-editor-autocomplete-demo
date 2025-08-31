@@ -27,39 +27,142 @@ function sanitizeContext(text: string): string {
     .trim();
 }
 
-// System prompts
-const SYSTEM_BASE = `You are an inline autocomplete engine.
-- Output ONLY the minimal continuation of the user's text.
-- No introductions, no sentences, no punctuation unless it is literally the next character.
-- Never add quotes/formatting; no trailing whitespace.`;
+// Cache-optimized system prompts - stable content for Gemini caching
+const SYSTEM_BASE_CACHED = `You are an inline autocomplete engine.
 
-const SYSTEM_WITH_CONTEXT = `You are an intelligent inline autocomplete engine with contextual awareness.
-- Output ONLY the minimal continuation of the user's text.
-- Use the provided context to make more relevant and appropriate suggestions.
-- Adapt to the specified document type, tone, language, and target audience.
-- Incorporate relevant keywords naturally when appropriate.
-- No introductions, no sentences, no punctuation unless it is literally the next character.
-- Never add quotes/formatting; no trailing whitespace.`;
+# Core Instructions
+- Output ONLY the minimal continuation of the user's text
+- No introductions, explanations, or complete sentences
+- No punctuation unless it is literally the next character needed
+- Never add quotes, formatting, or trailing whitespace
+- Stop at natural boundaries (spaces, punctuation, line breaks)
 
-function buildSystemPrompt(hasContext: boolean): string {
-  return hasContext ? SYSTEM_WITH_CONTEXT : SYSTEM_BASE;
+# Quality Guidelines
+- Provide contextually appropriate completions
+- Maintain consistency with the existing text style
+- Consider the document flow and natural language patterns
+- Prioritize brevity and relevance`;
+
+const SYSTEM_WITH_CONTEXT_CACHED = `You are an intelligent inline autocomplete engine with contextual awareness.
+
+# Core Instructions
+- Output ONLY the minimal continuation of the user's text
+- Use the provided context to make more relevant and appropriate suggestions
+- Adapt to the specified document type, tone, language, and target audience
+- Incorporate relevant keywords naturally when appropriate
+- No introductions, explanations, or complete sentences
+- No punctuation unless it is literally the next character needed
+- Never add quotes, formatting, or trailing whitespace
+- Stop at natural boundaries (spaces, punctuation, line breaks)
+
+# Quality Guidelines
+- Provide contextually appropriate completions
+- Maintain consistency with the existing text style and context
+- Consider the document flow and natural language patterns
+- Prioritize brevity and relevance
+- Ensure suggestions align with the specified tone and audience
+- Use context information to improve completion accuracy`;
+
+// Cache metrics interface for development monitoring
+interface CacheMetrics {
+  cacheHit?: boolean;
+  cacheCreated?: boolean;
+  inputTokens?: number;
+  outputTokens?: number;
+  ttft?: number; // Time to First Token in ms
 }
 
-function buildContextPrompt(context: z.infer<typeof ContextSchema>): string {
+function buildSystemPrompt(hasContext: boolean): string {
+  return hasContext ? SYSTEM_WITH_CONTEXT_CACHED : SYSTEM_BASE_CACHED;
+}
+
+// Build cache-optimized prompt structure for Gemini implicit caching
+function buildCacheOptimizedPrompt(left: string, context?: z.infer<typeof ContextSchema>): { system: string; user: string; cacheContext?: string } {
+  const hasContext = !!context;
+  const systemPrompt = buildSystemPrompt(hasContext);
+  
+  if (!hasContext) {
+    return {
+      system: systemPrompt,
+      user: left
+    };
+  }
+  
+  // Build stable context block for caching - place immediately after system
   const sanitizedContext = context.userContext ? sanitizeContext(context.userContext) : '';
   const sanitizedKeywords = context.keywords && context.keywords.length > 0 
     ? context.keywords.map(keyword => sanitizeContext(keyword)).join(', ') 
     : 'none specified';
   
-  return `Context Information:
-- Document Type: ${context.documentType || 'unspecified'}
-- Language: ${context.language || 'unspecified'}
-- Tone: ${context.tone || 'unspecified'}
-- Target Audience: ${context.audience ? sanitizeContext(context.audience) : 'unspecified'}
-- Keywords: ${sanitizedKeywords}
-- Additional Context: ${sanitizedContext}
+  const stableContextBlock = `
+# Document Context Information
+Document Type: ${context.documentType || 'unspecified'}
+Language: ${context.language || 'unspecified'}
+Tone: ${context.tone || 'unspecified'}
+Target Audience: ${context.audience ? sanitizeContext(context.audience) : 'unspecified'}
+Keywords: ${sanitizedKeywords}
+Additional Context: ${sanitizedContext}
 
-Text to complete:`;
+# Completion Task
+Provide the next few words or characters to continue this text:`;
+  
+  return {
+    system: systemPrompt,
+    user: `${stableContextBlock}\n\n${left}`,
+    cacheContext: stableContextBlock
+  };
+}
+
+// Extract cache metrics from AI response metadata
+function extractCacheMetrics(response: unknown): CacheMetrics {
+  const metrics: CacheMetrics = {};
+  
+  try {
+    // Type guard for response object
+    if (typeof response === 'object' && response !== null) {
+      const resp = response as Record<string, unknown>;
+      
+      // Check for Gemini-specific metadata
+      if (resp.response && typeof resp.response === 'object' && resp.response !== null) {
+        const geminiResponse = resp.response as Record<string, unknown>;
+        
+        if (geminiResponse.usageMetadata && typeof geminiResponse.usageMetadata === 'object' && geminiResponse.usageMetadata !== null) {
+          const usage = geminiResponse.usageMetadata as Record<string, unknown>;
+          if (typeof usage.promptTokenCount === 'number') {
+            metrics.inputTokens = usage.promptTokenCount;
+          }
+          if (typeof usage.candidatesTokenCount === 'number') {
+            metrics.outputTokens = usage.candidatesTokenCount;
+          }
+        }
+        
+        if (geminiResponse.metadata && typeof geminiResponse.metadata === 'object' && geminiResponse.metadata !== null) {
+          const metadata = geminiResponse.metadata as Record<string, unknown>;
+          metrics.cacheHit = Boolean(metadata.cacheHit);
+          metrics.cacheCreated = Boolean(metadata.cacheCreated);
+        }
+      }
+      
+      // Extract timing information if available
+      if (resp.timing && typeof resp.timing === 'object' && resp.timing !== null) {
+        const timing = resp.timing as Record<string, unknown>;
+        if (typeof timing.firstToken === 'number') {
+          metrics.ttft = timing.firstToken;
+        }
+      }
+    }
+  } catch (error) {
+    // Silently handle metadata extraction errors
+    console.warn('Failed to extract cache metrics:', error);
+  }
+  
+  return metrics;
+}
+
+// Legacy function kept for compatibility - now uses cache-optimized version
+function buildContextPrompt(context: z.infer<typeof ContextSchema>): string {
+  const optimized = buildCacheOptimizedPrompt('', context);
+  return optimized.cacheContext || '';
 }
 
 const BOUNDARY = /[\s\n\r\t,.;:!?…，。？！、）\)\]\}\u2013\u2014·]/;
@@ -106,14 +209,14 @@ export async function POST(request: NextRequest) {
       // Use model from environment or default to spec's model
       const modelName = process.env.GEMINI_MODEL || 'gemini-2.5-flash-lite';
       
-      // Build prompt based on whether context is provided
-      const systemPrompt = buildSystemPrompt(hasContext);
-      const userPrompt = hasContext ? `${buildContextPrompt(context!)}\n${left}` : left;
+      // Build cache-optimized prompt structure
+      const promptStructure = buildCacheOptimizedPrompt(left, context);
+      const startTime = Date.now();
       
-      const { textStream } = await streamText({
+      const result = await streamText({
         model: google(modelName),
-        system: systemPrompt,
-        prompt: userPrompt,
+        system: promptStructure.system,
+        prompt: promptStructure.user,
         temperature: 0.1,
         topP: 0.9,
         stopSequences: ['\n', ' ', '.', '?', '!'],
@@ -121,6 +224,11 @@ export async function POST(request: NextRequest) {
         abortSignal: controller.signal,
       });
 
+      // Extract stream and metadata for cache monitoring
+      const { textStream } = result;
+      const cacheMetrics = extractCacheMetrics(result);
+      const ttft = cacheMetrics.ttft || (Date.now() - startTime);
+      
       // Stream processing with boundary detection and token limiting
       let output = '';
       let boundaryStop = false;
@@ -166,10 +274,47 @@ export async function POST(request: NextRequest) {
       
       clearTimeout(timeoutId);
       
-      return NextResponse.json({ 
+      // Development-only cache monitoring and logging
+      const isDevelopment = process.env.NODE_ENV === 'development';
+      let debugInfo = undefined;
+      
+      if (isDevelopment) {
+        cacheMetrics.ttft = ttft;
+        debugInfo = {
+          cacheMetrics,
+          promptStructure: {
+            systemLength: promptStructure.system.length,
+            userLength: promptStructure.user.length,
+            hasCacheContext: !!promptStructure.cacheContext,
+            cacheContextLength: promptStructure.cacheContext?.length || 0
+          },
+          timing: {
+            requestStart: startTime,
+            firstToken: ttft,
+            totalTime: Date.now() - startTime
+          }
+        };
+        
+        // Log cache performance for development monitoring
+        console.log('🚀 Cache Performance:', {
+          cacheHit: cacheMetrics.cacheHit,
+          ttft: `${ttft}ms`,
+          contextSize: promptStructure.cacheContext?.length || 0,
+          totalTokens: (cacheMetrics.inputTokens || 0) + (cacheMetrics.outputTokens || 0)
+        });
+      }
+      
+      const response: { tail: string; confidence: number; debug?: typeof debugInfo } = { 
         tail: output,
         confidence: computeConfidence(output, { boundaryStop, truncatedByCharLimit, truncatedByTokenLimit, hasContext })
-      });
+      };
+      
+      // Add debug info only in development
+      if (isDevelopment && debugInfo) {
+        response.debug = debugInfo;
+      }
+      
+      return NextResponse.json(response);
       
     } catch (aiError) {
       clearTimeout(timeoutId);

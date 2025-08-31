@@ -29,6 +29,8 @@ export interface CompletionContextValue extends CompletionContextState {
   clearContext: () => void;
   getContextHash: () => Promise<string>;
   getTokenCount: () => number;
+  getTokenWarningLevel: () => import('@/lib/tokenizer').TokenWarningLevel;
+  isWithinTokenLimit: () => boolean;
 }
 
 /**
@@ -46,6 +48,39 @@ export interface CompletionRequest {
     documentType?: DocumentType;
     /** Language for completion generation */
     language?: Language;
+    /** Writing tone preference */
+    tone?: Tone;
+    /** Target audience description */
+    audience?: string;
+    /** Relevant keywords for completion */
+    keywords?: string[];
+    /** Additional user-provided context */
+    userContext?: string;
+  };
+}
+
+/**
+ * Cache metrics for development monitoring and optimization
+ * @interface CacheDebugInfo
+ */
+export interface CacheDebugInfo {
+  cacheMetrics: {
+    cacheHit?: boolean;
+    cacheCreated?: boolean;
+    inputTokens?: number;
+    outputTokens?: number;
+    ttft?: number; // Time to First Token in ms
+  };
+  promptStructure: {
+    systemLength: number;
+    userLength: number;
+    hasCacheContext: boolean;
+    cacheContextLength: number;
+  };
+  timing: {
+    requestStart: number;
+    firstToken: number;
+    totalTime: number;
   };
 }
 
@@ -60,6 +95,8 @@ export interface CompletionResponse {
   confidence?: number;
   /** Request ID for correlation with original request */
   requestId?: string;
+  /** Development-only debug information including cache metrics */
+  debug?: CacheDebugInfo;
 }
 
 /**
@@ -74,11 +111,9 @@ export type CompletionError =
   | { type: 'CONTENT_FILTERED'; message: string; retryable: false };
 
 /**
- * Context operation error types for structured error handling
+ * Context operation error types are defined in ContextErrorHandler.ts
+ * Import ContextError from @/lib/errors/ContextErrorHandler
  */
-export type ContextError = 
-  | { type: 'CRYPTO_UNAVAILABLE'; message: string; fallbackUsed: true }
-  | { type: 'STORAGE_ERROR'; message: string; operation: 'save' | 'load' };
 
 /**
  * Union type for API responses handling both success and error cases

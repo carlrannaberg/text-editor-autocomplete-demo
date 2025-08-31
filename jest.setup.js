@@ -44,6 +44,28 @@ jest.mock('next/server', () => ({
   },
 }));
 
+// Mock window.matchMedia for accessibility hooks
+Object.defineProperty(window, 'matchMedia', {
+  writable: true,
+  value: jest.fn().mockImplementation((query) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addEventListener: jest.fn(),
+    removeEventListener: jest.fn(),
+    dispatchEvent: jest.fn(),
+  })),
+});
+
+// Mock crypto.subtle for accessibility hooks
+Object.defineProperty(global, 'crypto', {
+  value: {
+    subtle: {
+      digest: jest.fn().mockResolvedValue(new ArrayBuffer(20))
+    }
+  }
+});
+
 // Mock Tiptap/ProseMirror modules that don't work in jsdom
 jest.mock('@tiptap/react', () => ({
   useEditor: jest.fn(),

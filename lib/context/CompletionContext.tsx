@@ -2,13 +2,19 @@
 
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import type {
-  ContextError,
   CompletionContextState,
   CompletionContextValue,
   DocumentType,
   Language,
   Tone
 } from '@/lib/types';
+import { ContextErrorHandler, type ContextError } from '@/lib/errors/ContextErrorHandler';
+import { 
+  getContextTokenCount, 
+  getTokenWarningLevel as getWarningLevel, 
+  isWithinTokenLimit as checkTokenLimit,
+  type TokenWarningLevel 
+} from '@/lib/tokenizer';
 
 // Context normalization for stable hashing
 const normalizeContext = (context: CompletionContextState) => ({
@@ -42,12 +48,7 @@ const generateContextHash = async (context: CompletionContextState): Promise<str
       .map(b => b.toString(16).padStart(2, '0'))
       .join('');
   } catch (error) {
-    const contextError: ContextError = {
-      type: 'CRYPTO_UNAVAILABLE',
-      message: 'Failed to generate context hash with crypto.subtle, using fallback',
-      fallbackUsed: true
-    };
-    
+    const contextError = ContextErrorHandler.handleCryptoError(error as Error);
     handleContextError(contextError);
     
     // Fallback to simple string hash for environments without crypto.subtle
@@ -78,12 +79,7 @@ const saveToLocalStorage = (context: CompletionContextState) => {
       localStorage.setItem(CONTEXT_STORAGE_KEY, JSON.stringify(context));
     }
   } catch (error) {
-    const contextError: ContextError = {
-      type: 'STORAGE_ERROR',
-      message: 'Failed to save context to localStorage',
-      operation: 'save'
-    };
-    
+    const contextError = ContextErrorHandler.handleStorageError('save', error as Error);
     handleContextError(contextError);
   }
 };
@@ -96,12 +92,7 @@ const loadFromLocalStorage = (): CompletionContextState => {
       return stored ? JSON.parse(stored) : getDefaultContext();
     }
   } catch (error) {
-    const contextError: ContextError = {
-      type: 'STORAGE_ERROR',
-      message: 'Failed to load context from localStorage',
-      operation: 'load'
-    };
-    
+    const contextError = ContextErrorHandler.handleStorageError('load', error as Error);
     handleContextError(contextError);
   }
   return getDefaultContext();
@@ -147,8 +138,17 @@ export const CompletionContextProvider: React.FC<{ children: React.ReactNode }> 
   }, [context]);
 
   const getTokenCount = useCallback(() => {
-    const fullContext = JSON.stringify(context);
-    return estimateTokenCount(fullContext);
+    return getContextTokenCount(context);
+  }, [context]);
+
+  const getTokenWarningLevel = useCallback(() => {
+    const tokenCount = getContextTokenCount(context);
+    return getWarningLevel(tokenCount);
+  }, [context]);
+
+  const isWithinTokenLimitCheck = useCallback(() => {
+    const tokenCount = getContextTokenCount(context);
+    return checkTokenLimit(tokenCount);
   }, [context]);
 
   const value: CompletionContextValue = {
@@ -156,7 +156,9 @@ export const CompletionContextProvider: React.FC<{ children: React.ReactNode }> 
     updateContext,
     clearContext,
     getContextHash,
-    getTokenCount
+    getTokenCount,
+    getTokenWarningLevel,
+    isWithinTokenLimit: isWithinTokenLimitCheck
   };
 
   return (
