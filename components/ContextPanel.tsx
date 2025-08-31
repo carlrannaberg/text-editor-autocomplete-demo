@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { useCompletionContext } from '@/lib/context/CompletionContext';
 import type { DocumentType, Language, Tone, CompletionContextState } from '@/lib/types';
 import { useTokenMonitoring } from '@/lib/hooks/useTokenMonitoring';
 import { useAccessibility } from '@/lib/hooks/useAccessibility';
-import { ContextErrorHandler, type ContextError } from '@/lib/errors/ContextErrorHandler';
-import { ErrorNotification, useErrorNotification } from '@/components/ErrorNotification';
+import { ErrorNotification } from '@/components/ErrorNotification';
+import { useContextErrorHandling } from '@/lib/hooks/useContextErrorHandling';
 import { ContextValidator, useDebouncedValidation, type ValidationResult } from '@/lib/validation/contextValidation';
 import { 
   useKeyboardShortcuts, 
@@ -33,16 +33,6 @@ interface ContextPanelProps {
 }
 
 
-// Enhanced error handling for UI components
-const handleUIError = (error: ContextError, showError?: (error: ContextError) => void) => {
-  if (process.env.NODE_ENV === 'development') {
-    console.warn(`UI ${error.type}:`, error.message);
-  }
-  // Show error notification to user (if not in test environment)
-  if (showError && process.env.NODE_ENV !== 'test') {
-    showError(error);
-  }
-};
 
 
 export const ContextPanel: React.FC<ContextPanelProps> = ({
@@ -67,27 +57,26 @@ export const ContextPanel: React.FC<ContextPanelProps> = ({
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [showKeyboardHelp, setShowKeyboardHelp] = useState(false);
   
-  // Error handling
-  const { currentError, showError, dismissError, retryOperation } = useErrorNotification();
+  // Unified error handling
+  const { 
+    currentError, 
+    dismissError, 
+    retryLastOperation,
+    handleStorageError,
+    handleValidationError,
+    handleContextUpdateError
+  } = useContextErrorHandling();
   
-  // Track failed operations for retry functionality
-  type FailedOperation = 
-    | { type: 'storage-save'; data: { key: string; value: string } }
-    | { type: 'storage-load'; data: { key: string } }
-    | { type: 'context-update'; data: Partial<CompletionContextState> }
-    | { type: 'validation'; data: CompletionContextState };
-  
-  const [lastFailedOperation, setLastFailedOperation] = useState<FailedOperation | null>(null);
   
   // Real-time validation
-  const currentContext: CompletionContextState = {
+  const currentContext: CompletionContextState = useMemo(() => ({
     contextText: contextText || '',
     audience: audience || '',
     keywords: keywords || [],
     ...(documentType && { documentType }),
     ...(language && { language }),
     ...(tone && { tone })
-  };
+  }), [contextText, audience, keywords, documentType, language, tone]);
   const { validation, isValidating } = useDebouncedValidation(currentContext, 300);
   
   // Refs for focus management
@@ -123,11 +112,9 @@ export const ContextPanel: React.FC<ContextPanelProps> = ({
         onToggleCollapse?.(collapsed);
       }
     } catch (error) {
-      setLastFailedOperation({ type: 'storage-load', data: { key: 'context-panel-collapsed' } });
-      const contextError = ContextErrorHandler.handleStorageError('load', error as Error);
-      handleUIError(contextError, showError);
+      handleStorageError('load')(error as Error, { key: 'context-panel-collapsed' });
     }
-  }, [onToggleCollapse, showError]);
+  }, [onToggleCollapse, handleStorageError]);
 
   const handleToggleCollapse = useCallback(() => {
     const newCollapsed = !localCollapsed;
@@ -138,11 +125,9 @@ export const ContextPanel: React.FC<ContextPanelProps> = ({
     try {
       localStorage.setItem('context-panel-collapsed', JSON.stringify(newCollapsed));
     } catch (error) {
-      setLastFailedOperation({ type: 'storage-save', data: { key: 'context-panel-collapsed', value: JSON.stringify(newCollapsed) } });
-      const contextError = ContextErrorHandler.handleStorageError('save', error as Error);
-      handleUIError(contextError, showError);
+      handleStorageError('save')(error as Error, { key: 'context-panel-collapsed', value: JSON.stringify(newCollapsed) });
     }
-  }, [localCollapsed, onToggleCollapse, showError]);
+  }, [localCollapsed, onToggleCollapse, handleStorageError]);
 
   // Keyboard shortcut handlers
   const handleTogglePanel = useCallback(() => {
@@ -170,9 +155,7 @@ export const ContextPanel: React.FC<ContextPanelProps> = ({
       try {
         localStorage.setItem('context-panel-collapsed', JSON.stringify(false));
       } catch (error) {
-        setLastFailedOperation({ type: 'storage-save', data: { key: 'context-panel-collapsed', value: 'false' } });
-        const contextError = ContextErrorHandler.handleStorageError('save', error as Error);
-        handleUIError(contextError, showError);
+        handleStorageError('save')(error as Error, { key: 'context-panel-collapsed', value: 'false' });
       }
     } else {
       // Panel is already expanded, just focus the textarea
@@ -183,7 +166,7 @@ export const ContextPanel: React.FC<ContextPanelProps> = ({
         contextTextareaRef.current.setSelectionRange(length, length);
       }
     }
-  }, [localCollapsed, onToggleCollapse, showError]);
+  }, [localCollapsed, onToggleCollapse, handleStorageError]);
 
   const handleShowKeyboardHelp = useCallback(() => {
     setShowKeyboardHelp(true);
@@ -260,11 +243,9 @@ export const ContextPanel: React.FC<ContextPanelProps> = ({
         announceContextChange('Context text', newText);
       }
     } catch (error) {
-      setLastFailedOperation({ type: 'context-update', data: { contextText: newText } });
-      const contextError = ContextErrorHandler.handleValidationError('contextText', newText, 'input validation');
-      handleUIError(contextError, showError);
+      handleContextUpdateError()(error as Error, { contextText: newText });
     }
-  }, [updateContext, contextText, announceContextChange, showError]);
+  }, [updateContext, contextText, announceContextChange, handleContextUpdateError]);
 
   const handleClearClick = useCallback(() => {
     if (contextText && contextText.trim()) {
@@ -305,9 +286,7 @@ export const ContextPanel: React.FC<ContextPanelProps> = ({
     });
     
     if (validationErrors.length > 0) {
-      setLastFailedOperation({ type: 'context-update', data: { audience: newValue } });
-      const contextError = ContextErrorHandler.handleValidationError('audience', newValue, validationErrors[0]?.rule || 'validation failed');
-      handleUIError(contextError, showError);
+      handleValidationError()(new Error(validationErrors[0]?.rule || 'validation failed'), currentContext);
       return; // Don't update if validation fails
     }
     
@@ -316,7 +295,7 @@ export const ContextPanel: React.FC<ContextPanelProps> = ({
     if (newValue.trim() === '' || newValue.length > 10) {
       announceContextChange('Target audience', newValue || 'cleared');
     }
-  }, [updateContext, announceContextChange, showError]);
+  }, [updateContext, announceContextChange, handleValidationError, currentContext]);
 
   const handleKeywordsChange = useCallback((newKeywords: string[]) => {
     const prevCount = keywords?.length || 0;
@@ -332,9 +311,7 @@ export const ContextPanel: React.FC<ContextPanelProps> = ({
     });
     
     if (validationErrors.length > 0) {
-      setLastFailedOperation({ type: 'context-update', data: { keywords: newKeywords } });
-      const contextError = ContextErrorHandler.handleValidationError('keywords', newKeywords, validationErrors[0]?.rule || 'validation failed');
-      handleUIError(contextError, showError);
+      handleValidationError()(new Error(validationErrors[0]?.rule || 'validation failed'), currentContext);
       return; // Don't update if validation fails
     }
     
@@ -347,7 +324,7 @@ export const ContextPanel: React.FC<ContextPanelProps> = ({
         announceStatus(`Removed keyword. ${newCount} keywords remaining.`);
       }
     }
-  }, [updateContext, keywords, announceStatus, showError]);
+  }, [updateContext, keywords, announceStatus, handleValidationError, currentContext]);
 
   const tokenCount = getTokenCount();
   const warningLevel = getTokenWarningLevel();
@@ -744,43 +721,7 @@ export const ContextPanel: React.FC<ContextPanelProps> = ({
       <ErrorNotification
         error={currentError}
         onDismiss={dismissError}
-        onRetry={() => retryOperation(async () => {
-          if (!lastFailedOperation) {
-            throw new Error('No operation to retry');
-          }
-          
-          switch (lastFailedOperation.type) {
-            case 'storage-save':
-              // Retry storage save operation
-              localStorage.setItem(lastFailedOperation.data.key, lastFailedOperation.data.value);
-              break;
-            case 'storage-load':
-              // Retry storage load operation
-              const stored = localStorage.getItem(lastFailedOperation.data.key);
-              if (stored && lastFailedOperation.data.key === 'context-panel-collapsed') {
-                const collapsed = JSON.parse(stored);
-                setLocalCollapsed(collapsed);
-                onToggleCollapse?.(collapsed);
-              }
-              break;
-            case 'context-update':
-              // Retry context update
-              updateContext(lastFailedOperation.data);
-              break;
-            case 'validation':
-              // Re-run validation
-              const result = ContextValidator.validateContext(lastFailedOperation.data);
-              if (!result.isValid) {
-                throw new Error(`Validation still failing: ${result.errors[0]?.message || 'Unknown error'}`);
-              }
-              break;
-            default:
-              throw new Error('Unknown operation type');
-          }
-          
-          // Clear the failed operation on successful retry
-          setLastFailedOperation(null);
-        })}
+        onRetry={retryLastOperation}
         autoDismissMs={5000}
         showTechnicalDetails={process.env.NODE_ENV === 'development'}
       />
