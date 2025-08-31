@@ -2,9 +2,9 @@
   "metadata": {
     "version": 1,
     "root": "/Users/carl/Development/agents/text-editor-autocomplete-demo",
-    "createdAt": "2025-08-30T16:31:42.579Z",
-    "updatedAt": "2025-08-30T16:31:42.579Z",
-    "totalFiles": 19
+    "createdAt": "2025-08-31T19:00:38.241Z",
+    "updatedAt": "2025-08-31T19:00:38.241Z",
+    "totalFiles": 37
   },
   "tree": {
     "name": "text-editor-autocomplete-demo",
@@ -14,6 +14,16 @@
         "name": "__tests__",
         "type": "dir",
         "children": [
+          {
+            "name": "accessibility",
+            "type": "dir",
+            "children": [
+              {
+                "name": "accessibility.test.tsx",
+                "type": "file"
+              }
+            ]
+          },
           {
             "name": "api",
             "type": "dir",
@@ -35,6 +45,24 @@
               {
                 "name": "ContextPanel.test.tsx",
                 "type": "file"
+              },
+              {
+                "name": "ErrorNotification.test.tsx",
+                "type": "file"
+              },
+              {
+                "name": "KeyboardShortcutsHelp.test.tsx",
+                "type": "file"
+              }
+            ]
+          },
+          {
+            "name": "hooks",
+            "type": "dir",
+            "children": [
+              {
+                "name": "useKeyboardShortcuts.test.ts",
+                "type": "file"
               }
             ]
           },
@@ -51,6 +79,20 @@
                     "type": "file"
                   }
                 ]
+              },
+              {
+                "name": "errors",
+                "type": "dir",
+                "children": [
+                  {
+                    "name": "ContextErrorHandler.test.ts",
+                    "type": "file"
+                  }
+                ]
+              },
+              {
+                "name": "cache-optimization.test.ts",
+                "type": "file"
               },
               {
                 "name": "InlineComplete.test.ts",
@@ -109,7 +151,23 @@
         "type": "dir",
         "children": [
           {
+            "name": "AccessibleKeywordsInput.tsx",
+            "type": "file"
+          },
+          {
+            "name": "CachePerformanceDisplay.tsx",
+            "type": "file"
+          },
+          {
             "name": "ContextPanel.tsx",
+            "type": "file"
+          },
+          {
+            "name": "ErrorNotification.tsx",
+            "type": "file"
+          },
+          {
+            "name": "KeyboardShortcutsHelp.tsx",
             "type": "file"
           }
         ]
@@ -129,7 +187,57 @@
             ]
           },
           {
+            "name": "errors",
+            "type": "dir",
+            "children": [
+              {
+                "name": "ContextErrorHandler.ts",
+                "type": "file"
+              }
+            ]
+          },
+          {
+            "name": "hooks",
+            "type": "dir",
+            "children": [
+              {
+                "name": "useAccessibility.ts",
+                "type": "file"
+              },
+              {
+                "name": "useCacheMonitoring.ts",
+                "type": "file"
+              },
+              {
+                "name": "useContextErrorHandling.ts",
+                "type": "file"
+              },
+              {
+                "name": "useKeyboardShortcuts.ts",
+                "type": "file"
+              },
+              {
+                "name": "useTokenMonitoring.ts",
+                "type": "file"
+              }
+            ]
+          },
+          {
+            "name": "validation",
+            "type": "dir",
+            "children": [
+              {
+                "name": "contextValidation.ts",
+                "type": "file"
+              }
+            ]
+          },
+          {
             "name": "InlineComplete.ts",
+            "type": "file"
+          },
+          {
+            "name": "tokenizer.ts",
             "type": "file"
           },
           {
@@ -161,22 +269,40 @@
     ]
   },
   "nodes": [
+    "__tests__/accessibility/accessibility.test.tsx",
     "__tests__/api/complete.test.ts",
     "__tests__/components/AutocompleteEditor.test.tsx",
     "__tests__/components/ContextPanel.test.tsx",
+    "__tests__/components/ErrorNotification.test.tsx",
+    "__tests__/components/KeyboardShortcutsHelp.test.tsx",
+    "__tests__/hooks/useKeyboardShortcuts.test.ts",
     "__tests__/lib/InlineComplete.test.ts",
+    "__tests__/lib/cache-optimization.test.ts",
     "__tests__/lib/context/CompletionContext.test.tsx",
+    "__tests__/lib/errors/ContextErrorHandler.test.ts",
     "__tests__/setup.test.ts",
     "__tests__/utils/test-helpers.tsx",
     "app/api/complete/route.ts",
     "app/layout.tsx",
     "app/page.tsx",
+    "components/AccessibleKeywordsInput.tsx",
+    "components/CachePerformanceDisplay.tsx",
     "components/ContextPanel.tsx",
+    "components/ErrorNotification.tsx",
+    "components/KeyboardShortcutsHelp.tsx",
     "jest.config.js",
     "jest.setup.js",
     "lib/InlineComplete.ts",
     "lib/context/CompletionContext.tsx",
+    "lib/errors/ContextErrorHandler.ts",
+    "lib/hooks/useAccessibility.ts",
+    "lib/hooks/useCacheMonitoring.ts",
+    "lib/hooks/useContextErrorHandling.ts",
+    "lib/hooks/useKeyboardShortcuts.ts",
+    "lib/hooks/useTokenMonitoring.ts",
+    "lib/tokenizer.ts",
     "lib/types.ts",
+    "lib/validation/contextValidation.ts",
     "next.config.js",
     "postcss.config.js",
     "tailwind.config.js"
@@ -195,6 +321,10 @@
       "to": "__tests__/utils/test-helpers.tsx"
     },
     {
+      "from": "__tests__/components/ErrorNotification.test.tsx",
+      "to": "__tests__/utils/test-helpers.tsx"
+    },
+    {
       "from": "__tests__/lib/context/CompletionContext.test.tsx",
       "to": "__tests__/utils/test-helpers.tsx"
     },
@@ -208,6 +338,75 @@
     }
   ],
   "files": {
+    "__tests__/accessibility/accessibility.test.tsx": {
+      "imports": [
+        {
+          "from": "react",
+          "kind": "import",
+          "isDefault": true
+        },
+        {
+          "from": "@testing-library/react",
+          "kind": "import",
+          "imported": [
+            "render",
+            "screen",
+            "fireEvent",
+            "waitFor"
+          ]
+        },
+        {
+          "from": "@testing-library/user-event",
+          "kind": "import",
+          "isDefault": true
+        },
+        {
+          "from": "jest-axe",
+          "kind": "import",
+          "imported": [
+            "axe",
+            "toHaveNoViolations"
+          ]
+        },
+        {
+          "from": "@/components/ContextPanel",
+          "kind": "import",
+          "imported": [
+            "ContextPanel"
+          ]
+        },
+        {
+          "from": "@/components/AccessibleKeywordsInput",
+          "kind": "import",
+          "imported": [
+            "AccessibleKeywordsInput"
+          ]
+        },
+        {
+          "from": "@/lib/context/CompletionContext",
+          "kind": "import",
+          "imported": [
+            "CompletionContextProvider"
+          ]
+        }
+      ],
+      "dependencies": [],
+      "functions": [],
+      "classes": [],
+      "constants": [
+        {
+          "name": "TestWrapper",
+          "initKind": "function",
+          "isExported": false,
+          "type": "React.FC<{ children: React.ReactNode }>"
+        },
+        {
+          "name": "renderWithAccessibility",
+          "initKind": "function",
+          "isExported": false
+        }
+      ]
+    },
     "__tests__/api/complete.test.ts": {
       "imports": [
         {
@@ -328,6 +527,121 @@
         }
       ]
     },
+    "__tests__/components/ErrorNotification.test.tsx": {
+      "imports": [
+        {
+          "from": "react",
+          "kind": "import",
+          "isDefault": true
+        },
+        {
+          "from": "../utils/test-helpers",
+          "kind": "import",
+          "imported": [
+            "render",
+            "screen",
+            "fireEvent",
+            "waitFor"
+          ]
+        },
+        {
+          "from": "@testing-library/user-event",
+          "kind": "import",
+          "isDefault": true
+        },
+        {
+          "from": "@/components/ErrorNotification",
+          "kind": "import",
+          "imported": [
+            "ErrorNotification",
+            "useErrorNotification"
+          ]
+        },
+        {
+          "from": "@/lib/errors/ContextErrorHandler",
+          "kind": "import",
+          "imported": [
+            "ContextErrorHandler"
+          ]
+        }
+      ],
+      "dependencies": [
+        "__tests__/utils/test-helpers.tsx"
+      ],
+      "functions": [],
+      "classes": [],
+      "constants": []
+    },
+    "__tests__/components/KeyboardShortcutsHelp.test.tsx": {
+      "imports": [
+        {
+          "from": "react",
+          "kind": "import"
+        },
+        {
+          "from": "@testing-library/react",
+          "kind": "import"
+        },
+        {
+          "from": "@testing-library/user-event",
+          "kind": "import"
+        },
+        {
+          "from": "@/components/KeyboardShortcutsHelp",
+          "kind": "import"
+        },
+        {
+          "from": "@/lib/hooks/useKeyboardShortcuts",
+          "kind": "import"
+        },
+        {
+          "from": "@/lib/hooks/useKeyboardShortcuts",
+          "kind": "import"
+        }
+      ],
+      "dependencies": [],
+      "functions": [],
+      "classes": [],
+      "constants": []
+    },
+    "__tests__/hooks/useKeyboardShortcuts.test.ts": {
+      "imports": [
+        {
+          "from": "@testing-library/react",
+          "kind": "import",
+          "imported": [
+            "renderHook",
+            "act"
+          ]
+        },
+        {
+          "from": "@/lib/hooks/useKeyboardShortcuts",
+          "kind": "import",
+          "imported": [
+            "useKeyboardShortcuts",
+            "useEscapeKey",
+            "useFocusManagement"
+          ]
+        },
+        {
+          "from": "@/lib/hooks/useKeyboardShortcuts",
+          "kind": "import",
+          "imported": [
+            "KeyboardShortcut"
+          ]
+        }
+      ],
+      "dependencies": [],
+      "functions": [],
+      "classes": [],
+      "constants": [
+        {
+          "name": "originalNavigator",
+          "initKind": "unknown",
+          "isExported": false
+        }
+      ]
+    },
     "__tests__/lib/InlineComplete.test.ts": {
       "imports": [
         {
@@ -336,6 +650,28 @@
           "imported": [
             "InlineComplete",
             "pluginKey"
+          ]
+        }
+      ],
+      "dependencies": [],
+      "functions": [],
+      "classes": [],
+      "constants": []
+    },
+    "__tests__/lib/cache-optimization.test.ts": {
+      "imports": [
+        {
+          "from": "@/lib/hooks/useCacheMonitoring",
+          "kind": "import",
+          "imported": [
+            "extractDebugMetrics"
+          ]
+        },
+        {
+          "from": "@/lib/hooks/useCacheMonitoring",
+          "kind": "import",
+          "imported": [
+            "CacheMetrics"
           ]
         }
       ],
@@ -406,6 +742,23 @@
           "isExported": false
         }
       ]
+    },
+    "__tests__/lib/errors/ContextErrorHandler.test.ts": {
+      "imports": [
+        {
+          "from": "@/lib/errors/ContextErrorHandler",
+          "kind": "import",
+          "imported": [
+            "ContextErrorHandler",
+            "ContextError",
+            "ErrorMetrics"
+          ]
+        }
+      ],
+      "dependencies": [],
+      "functions": [],
+      "classes": [],
+      "constants": []
     },
     "__tests__/setup.test.ts": {
       "imports": [
@@ -664,6 +1017,13 @@
           "imported": [
             "ContextPanel"
           ]
+        },
+        {
+          "from": "@/lib/hooks/useAccessibility",
+          "kind": "import",
+          "imported": [
+            "useAccessibility"
+          ]
         }
       ],
       "dependencies": [],
@@ -739,6 +1099,106 @@
         }
       ]
     },
+    "components/AccessibleKeywordsInput.tsx": {
+      "imports": [
+        {
+          "from": "react",
+          "kind": "import",
+          "isDefault": true,
+          "imported": [
+            "useState",
+            "useCallback",
+            "useRef",
+            "useEffect"
+          ]
+        },
+        {
+          "from": "@/lib/hooks/useAccessibility",
+          "kind": "import",
+          "imported": [
+            "useAccessibility"
+          ]
+        }
+      ],
+      "dependencies": [],
+      "functions": [],
+      "classes": [],
+      "constants": [
+        {
+          "name": "AccessibleKeywordsInput",
+          "initKind": "function",
+          "isExported": true,
+          "type": "React.FC<AccessibleKeywordsInputProps>"
+        }
+      ]
+    },
+    "components/CachePerformanceDisplay.tsx": {
+      "imports": [
+        {
+          "from": "react",
+          "kind": "import",
+          "isDefault": true
+        },
+        {
+          "from": "@/lib/hooks/useCacheMonitoring",
+          "kind": "import",
+          "imported": [
+            "useCacheMonitoring",
+            "CacheStats",
+            "CachePerformanceMetrics"
+          ]
+        }
+      ],
+      "dependencies": [],
+      "functions": [
+        {
+          "name": "CachePerformanceDisplay",
+          "params": [
+            {
+              "name": "unknown",
+              "type": "CachePerformanceDisplayProps"
+            }
+          ],
+          "isAsync": false,
+          "isExported": true
+        },
+        {
+          "name": "MetricCard",
+          "params": [
+            {
+              "name": "unknown",
+              "type": "MetricCardProps"
+            }
+          ],
+          "isAsync": false,
+          "isExported": false
+        },
+        {
+          "name": "RequestRow",
+          "params": [
+            {
+              "name": "unknown",
+              "type": "RequestRowProps"
+            }
+          ],
+          "isAsync": false,
+          "isExported": false
+        },
+        {
+          "name": "CachePerformanceCompact",
+          "params": [
+            {
+              "name": "unknown",
+              "type": "{ className?: string }"
+            }
+          ],
+          "isAsync": false,
+          "isExported": true
+        }
+      ],
+      "classes": [],
+      "constants": []
+    },
     "components/ContextPanel.tsx": {
       "imports": [
         {
@@ -748,7 +1208,9 @@
           "imported": [
             "useState",
             "useCallback",
-            "useEffect"
+            "useEffect",
+            "useRef",
+            "useMemo"
           ]
         },
         {
@@ -762,7 +1224,83 @@
           "from": "@/lib/types",
           "kind": "import",
           "imported": [
-            "ContextError"
+            "DocumentType",
+            "Language",
+            "Tone",
+            "CompletionContextState"
+          ]
+        },
+        {
+          "from": "@/lib/hooks/useTokenMonitoring",
+          "kind": "import",
+          "imported": [
+            "useTokenMonitoring"
+          ]
+        },
+        {
+          "from": "@/lib/hooks/useAccessibility",
+          "kind": "import",
+          "imported": [
+            "useAccessibility"
+          ]
+        },
+        {
+          "from": "@/components/ErrorNotification",
+          "kind": "import",
+          "imported": [
+            "ErrorNotification"
+          ]
+        },
+        {
+          "from": "@/lib/hooks/useContextErrorHandling",
+          "kind": "import",
+          "imported": [
+            "useContextErrorHandling"
+          ]
+        },
+        {
+          "from": "@/lib/validation/contextValidation",
+          "kind": "import",
+          "imported": [
+            "ContextValidator",
+            "useDebouncedValidation",
+            "ValidationResult"
+          ]
+        },
+        {
+          "from": "@/lib/hooks/useKeyboardShortcuts",
+          "kind": "import",
+          "imported": [
+            "useKeyboardShortcuts",
+            "useEscapeKey",
+            "useFocusManagement",
+            "KeyboardShortcut"
+          ]
+        },
+        {
+          "from": "@/components/KeyboardShortcutsHelp",
+          "kind": "import",
+          "imported": [
+            "KeyboardShortcutsHelp"
+          ]
+        },
+        {
+          "from": "@/components/AccessibleKeywordsInput",
+          "kind": "import",
+          "imported": [
+            "AccessibleKeywordsInput"
+          ]
+        },
+        {
+          "from": "@/lib/tokenizer",
+          "kind": "import",
+          "imported": [
+            "getTokenCountColorClass",
+            "getTokenWarningMessage",
+            "getTokenProgress",
+            "getProgressBarColorClass",
+            "getWarningIcon",
+            "MAX_TOKEN_LIMIT"
           ]
         }
       ],
@@ -771,15 +1309,84 @@
       "classes": [],
       "constants": [
         {
-          "name": "handleUIError",
-          "initKind": "function",
-          "isExported": false
-        },
-        {
           "name": "ContextPanel",
           "initKind": "function",
           "isExported": true,
           "type": "React.FC<ContextPanelProps>"
+        }
+      ]
+    },
+    "components/ErrorNotification.tsx": {
+      "imports": [
+        {
+          "from": "react",
+          "kind": "import",
+          "isDefault": true,
+          "imported": [
+            "useEffect",
+            "useCallback",
+            "useState"
+          ]
+        },
+        {
+          "from": "@/lib/errors/ContextErrorHandler",
+          "kind": "import",
+          "imported": [
+            "ContextError",
+            "RecoveryStrategy",
+            "ContextErrorHandler"
+          ]
+        }
+      ],
+      "dependencies": [],
+      "functions": [
+        {
+          "name": "useErrorNotification",
+          "params": [],
+          "isAsync": false,
+          "isExported": true
+        }
+      ],
+      "classes": [],
+      "constants": [
+        {
+          "name": "ErrorNotification",
+          "initKind": "function",
+          "isExported": true,
+          "type": "React.FC<ErrorNotificationProps>"
+        }
+      ]
+    },
+    "components/KeyboardShortcutsHelp.tsx": {
+      "imports": [
+        {
+          "from": "react",
+          "kind": "import",
+          "isDefault": true
+        },
+        {
+          "from": "@/lib/hooks/useKeyboardShortcuts",
+          "kind": "import",
+          "imported": [
+            "KeyboardShortcut"
+          ]
+        }
+      ],
+      "dependencies": [],
+      "functions": [],
+      "classes": [],
+      "constants": [
+        {
+          "name": "ShortcutRow",
+          "initKind": "function",
+          "isExported": false,
+          "type": "React.FC<ShortcutRowProps>"
+        },
+        {
+          "name": "KeyboardShortcutsHelp",
+          "initKind": "function",
+          "isExported": true,
+          "type": "React.FC<KeyboardShortcutsHelpProps>"
         }
       ]
     },
@@ -868,12 +1475,29 @@
           "from": "@/lib/types",
           "kind": "import",
           "imported": [
-            "ContextError",
             "CompletionContextState",
             "CompletionContextValue",
             "DocumentType",
             "Language",
             "Tone"
+          ]
+        },
+        {
+          "from": "@/lib/errors/ContextErrorHandler",
+          "kind": "import",
+          "imported": [
+            "ContextErrorHandler",
+            "ContextError"
+          ]
+        },
+        {
+          "from": "@/lib/tokenizer",
+          "kind": "import",
+          "imported": [
+            "getContextTokenCount",
+            "getWarningLevel",
+            "checkTokenLimit",
+            "TokenWarningLevel"
           ]
         }
       ],
@@ -939,11 +1563,901 @@
         }
       ]
     },
+    "lib/errors/ContextErrorHandler.ts": {
+      "imports": [
+        {
+          "from": "@/lib/types",
+          "kind": "import",
+          "imported": [
+            "CompletionContextState"
+          ]
+        }
+      ],
+      "dependencies": [],
+      "functions": [],
+      "classes": [
+        {
+          "name": "ContextErrorHandler",
+          "isExported": true,
+          "methods": [
+            {
+              "name": "createError",
+              "params": [
+                {
+                  "name": "type",
+                  "type": "ContextErrorType"
+                },
+                {
+                  "name": "message",
+                  "type": "string"
+                },
+                {
+                  "name": "options",
+                  "type": "{\n      severity?: ErrorSeverity;\n      originalError?: Error;\n      context?: Record<string, unknown>;\n      code?: string;\n    }"
+                }
+              ],
+              "isAsync": false,
+              "returnType": "ContextError",
+              "isStatic": true
+            },
+            {
+              "name": "handleStorageError",
+              "params": [
+                {
+                  "name": "operation",
+                  "type": "'save' | 'load'"
+                },
+                {
+                  "name": "error",
+                  "type": "Error"
+                }
+              ],
+              "isAsync": false,
+              "returnType": "ContextError",
+              "isStatic": true
+            },
+            {
+              "name": "handleValidationError",
+              "params": [
+                {
+                  "name": "field",
+                  "type": "string"
+                },
+                {
+                  "name": "value",
+                  "type": "unknown"
+                },
+                {
+                  "name": "rule",
+                  "type": "string"
+                }
+              ],
+              "isAsync": false,
+              "returnType": "ContextError",
+              "isStatic": true
+            },
+            {
+              "name": "handleTokenLimitError",
+              "params": [
+                {
+                  "name": "currentCount",
+                  "type": "number"
+                },
+                {
+                  "name": "maxCount",
+                  "type": "number"
+                }
+              ],
+              "isAsync": false,
+              "returnType": "ContextError",
+              "isStatic": true
+            },
+            {
+              "name": "handleNetworkError",
+              "params": [
+                {
+                  "name": "operation",
+                  "type": "string"
+                },
+                {
+                  "name": "error",
+                  "type": "Error"
+                }
+              ],
+              "isAsync": false,
+              "returnType": "ContextError",
+              "isStatic": true
+            },
+            {
+              "name": "handleCryptoError",
+              "params": [
+                {
+                  "name": "error",
+                  "type": "Error"
+                }
+              ],
+              "isAsync": false,
+              "returnType": "ContextError",
+              "isStatic": true
+            },
+            {
+              "name": "handleBrowserError",
+              "params": [
+                {
+                  "name": "feature",
+                  "type": "string"
+                }
+              ],
+              "isAsync": false,
+              "returnType": "ContextError",
+              "isStatic": true
+            },
+            {
+              "name": "getRecoveryStrategy",
+              "params": [
+                {
+                  "name": "errorType",
+                  "type": "ContextErrorType"
+                }
+              ],
+              "isAsync": false,
+              "returnType": "RecoveryStrategy",
+              "isStatic": true
+            },
+            {
+              "name": "attemptRecovery",
+              "params": [
+                {
+                  "name": "error",
+                  "type": "ContextError"
+                },
+                {
+                  "name": "operation",
+                  "type": "() => Promise<T>"
+                },
+                {
+                  "name": "retryCount",
+                  "type": "number"
+                }
+              ],
+              "isAsync": true,
+              "returnType": "Promise<T | null>",
+              "isStatic": true
+            },
+            {
+              "name": "getMetrics",
+              "params": [],
+              "isAsync": false,
+              "returnType": "ErrorMetrics",
+              "isStatic": true
+            },
+            {
+              "name": "resetMetrics",
+              "params": [],
+              "isAsync": false,
+              "returnType": "void",
+              "isStatic": true
+            },
+            {
+              "name": "isRetryable",
+              "params": [
+                {
+                  "name": "type",
+                  "type": "ContextErrorType"
+                }
+              ],
+              "isAsync": false,
+              "returnType": "boolean",
+              "isStatic": true,
+              "isPrivate": true
+            },
+            {
+              "name": "isRecoverable",
+              "params": [
+                {
+                  "name": "type",
+                  "type": "ContextErrorType"
+                }
+              ],
+              "isAsync": false,
+              "returnType": "boolean",
+              "isStatic": true,
+              "isPrivate": true
+            },
+            {
+              "name": "getDefaultSeverity",
+              "params": [
+                {
+                  "name": "type",
+                  "type": "ContextErrorType"
+                }
+              ],
+              "isAsync": false,
+              "returnType": "ErrorSeverity",
+              "isStatic": true,
+              "isPrivate": true
+            },
+            {
+              "name": "generateUserMessage",
+              "params": [
+                {
+                  "name": "type",
+                  "type": "ContextErrorType"
+                },
+                {
+                  "name": "message",
+                  "type": "string"
+                }
+              ],
+              "isAsync": false,
+              "returnType": "string",
+              "isStatic": true,
+              "isPrivate": true
+            },
+            {
+              "name": "updateMetrics",
+              "params": [
+                {
+                  "name": "error",
+                  "type": "ContextError"
+                }
+              ],
+              "isAsync": false,
+              "returnType": "void",
+              "isStatic": true,
+              "isPrivate": true
+            },
+            {
+              "name": "logError",
+              "params": [
+                {
+                  "name": "error",
+                  "type": "ContextError"
+                }
+              ],
+              "isAsync": false,
+              "returnType": "void",
+              "isStatic": true,
+              "isPrivate": true
+            }
+          ],
+          "properties": [
+            {
+              "name": "metrics",
+              "type": "ErrorMetrics",
+              "isStatic": true,
+              "isPrivate": true
+            },
+            {
+              "name": "isDevelopment",
+              "isStatic": true,
+              "isPrivate": true
+            }
+          ]
+        }
+      ],
+      "constants": []
+    },
+    "lib/hooks/useAccessibility.ts": {
+      "imports": [
+        {
+          "from": "react",
+          "kind": "import"
+        }
+      ],
+      "dependencies": [],
+      "functions": [],
+      "classes": [],
+      "constants": []
+    },
+    "lib/hooks/useCacheMonitoring.ts": {
+      "imports": [
+        {
+          "from": "react",
+          "kind": "import",
+          "imported": [
+            "useState",
+            "useEffect",
+            "useCallback",
+            "useRef",
+            "useMemo"
+          ]
+        }
+      ],
+      "dependencies": [],
+      "functions": [
+        {
+          "name": "useCacheMonitoring",
+          "params": [
+            {
+              "name": "options",
+              "type": "CacheMonitoringOptions"
+            }
+          ],
+          "isAsync": false,
+          "isExported": true
+        },
+        {
+          "name": "extractDebugMetrics",
+          "params": [
+            {
+              "name": "response",
+              "type": "{ debug?: unknown }"
+            }
+          ],
+          "isAsync": false,
+          "isExported": true,
+          "returnType": "CacheMetrics | null"
+        }
+      ],
+      "classes": [],
+      "constants": []
+    },
+    "lib/hooks/useContextErrorHandling.ts": {
+      "imports": [
+        {
+          "from": "react",
+          "kind": "import",
+          "imported": [
+            "useState",
+            "useCallback"
+          ]
+        },
+        {
+          "from": "@/lib/errors/ContextErrorHandler",
+          "kind": "import",
+          "imported": [
+            "ContextError",
+            "ContextErrorHandler"
+          ]
+        },
+        {
+          "from": "@/components/ErrorNotification",
+          "kind": "import",
+          "imported": [
+            "useErrorNotification"
+          ]
+        },
+        {
+          "from": "@/lib/types",
+          "kind": "import",
+          "imported": [
+            "CompletionContextState"
+          ]
+        }
+      ],
+      "dependencies": [],
+      "functions": [
+        {
+          "name": "useContextErrorHandling",
+          "params": [],
+          "isAsync": false,
+          "isExported": true
+        },
+        {
+          "name": "createContextError",
+          "params": [
+            {
+              "name": "operation",
+              "type": "FailedOperation"
+            },
+            {
+              "name": "error",
+              "type": "Error"
+            }
+          ],
+          "isAsync": false,
+          "isExported": false,
+          "returnType": "ContextError"
+        },
+        {
+          "name": "executeFailedOperation",
+          "params": [
+            {
+              "name": "operation",
+              "type": "FailedOperation"
+            }
+          ],
+          "isAsync": true,
+          "isExported": false,
+          "returnType": "Promise<void>"
+        }
+      ],
+      "classes": [],
+      "constants": []
+    },
+    "lib/hooks/useKeyboardShortcuts.ts": {
+      "imports": [
+        {
+          "from": "react",
+          "kind": "import"
+        }
+      ],
+      "dependencies": [],
+      "functions": [],
+      "classes": [],
+      "constants": []
+    },
+    "lib/hooks/useTokenMonitoring.ts": {
+      "imports": [
+        {
+          "from": "react",
+          "kind": "import",
+          "imported": [
+            "useEffect",
+            "useRef"
+          ]
+        },
+        {
+          "from": "@/lib/tokenizer",
+          "kind": "import",
+          "imported": [
+            "TokenWarningLevel",
+            "getTokenWarningLevel",
+            "getTokenWarningMessage"
+          ]
+        }
+      ],
+      "dependencies": [],
+      "functions": [
+        {
+          "name": "useTokenMonitoring",
+          "params": [
+            {
+              "name": "tokenCount",
+              "type": "number"
+            },
+            {
+              "name": "enabled",
+              "type": "boolean"
+            }
+          ],
+          "isAsync": false,
+          "isExported": true
+        }
+      ],
+      "classes": [],
+      "constants": []
+    },
+    "lib/tokenizer.ts": {
+      "imports": [
+        {
+          "from": "gpt3-tokenizer",
+          "kind": "import",
+          "isDefault": true
+        },
+        {
+          "from": "@/lib/types",
+          "kind": "import",
+          "imported": [
+            "CompletionContextState"
+          ]
+        }
+      ],
+      "dependencies": [],
+      "functions": [
+        {
+          "name": "getTokenCount",
+          "params": [
+            {
+              "name": "text",
+              "type": "string"
+            }
+          ],
+          "isAsync": false,
+          "isExported": true,
+          "returnType": "number"
+        },
+        {
+          "name": "getContextTokenCount",
+          "params": [
+            {
+              "name": "context",
+              "type": "CompletionContextState"
+            }
+          ],
+          "isAsync": false,
+          "isExported": true,
+          "returnType": "number"
+        },
+        {
+          "name": "getTokenWarningLevel",
+          "params": [
+            {
+              "name": "tokenCount",
+              "type": "number"
+            }
+          ],
+          "isAsync": false,
+          "isExported": true,
+          "returnType": "TokenWarningLevel"
+        },
+        {
+          "name": "getTokenCountColorClass",
+          "params": [
+            {
+              "name": "warningLevel",
+              "type": "TokenWarningLevel"
+            }
+          ],
+          "isAsync": false,
+          "isExported": true,
+          "returnType": "string"
+        },
+        {
+          "name": "getTokenWarningMessage",
+          "params": [
+            {
+              "name": "tokenCount",
+              "type": "number"
+            },
+            {
+              "name": "warningLevel",
+              "type": "TokenWarningLevel"
+            }
+          ],
+          "isAsync": false,
+          "isExported": true,
+          "returnType": "string | null"
+        },
+        {
+          "name": "getTokenProgress",
+          "params": [
+            {
+              "name": "tokenCount",
+              "type": "number"
+            }
+          ],
+          "isAsync": false,
+          "isExported": true,
+          "returnType": "number"
+        },
+        {
+          "name": "getProgressBarColorClass",
+          "params": [
+            {
+              "name": "warningLevel",
+              "type": "TokenWarningLevel"
+            }
+          ],
+          "isAsync": false,
+          "isExported": true,
+          "returnType": "string"
+        },
+        {
+          "name": "isWithinTokenLimit",
+          "params": [
+            {
+              "name": "tokenCount",
+              "type": "number"
+            }
+          ],
+          "isAsync": false,
+          "isExported": true,
+          "returnType": "boolean"
+        },
+        {
+          "name": "getWarningIcon",
+          "params": [
+            {
+              "name": "warningLevel",
+              "type": "TokenWarningLevel"
+            }
+          ],
+          "isAsync": false,
+          "isExported": true,
+          "returnType": "string | null"
+        },
+        {
+          "name": "getTokenizerDebugInfo",
+          "params": [],
+          "isAsync": false,
+          "isExported": true
+        }
+      ],
+      "classes": [],
+      "constants": [
+        {
+          "name": "GPT3Tokenizer",
+          "initKind": "unknown",
+          "isExported": false,
+          "type": "GPT3TokenizerConstructor"
+        },
+        {
+          "name": "TOKEN_THRESHOLDS",
+          "initKind": "unknown",
+          "isExported": false
+        },
+        {
+          "name": "MAX_TOKEN_LIMIT",
+          "initKind": "literal",
+          "isExported": true
+        }
+      ]
+    },
     "lib/types.ts": {
       "imports": [],
       "dependencies": [],
       "functions": [],
       "classes": [],
+      "constants": []
+    },
+    "lib/validation/contextValidation.ts": {
+      "imports": [
+        {
+          "from": "react",
+          "kind": "import",
+          "isDefault": true
+        },
+        {
+          "from": "@/lib/types",
+          "kind": "import",
+          "imported": [
+            "CompletionContextState",
+            "DocumentType",
+            "Language",
+            "Tone"
+          ]
+        },
+        {
+          "from": "@/lib/tokenizer",
+          "kind": "import",
+          "imported": [
+            "getContextTokenCount",
+            "MAX_TOKEN_LIMIT"
+          ]
+        }
+      ],
+      "dependencies": [],
+      "functions": [
+        {
+          "name": "useFieldValidation",
+          "params": [
+            {
+              "name": "value",
+              "type": "T"
+            },
+            {
+              "name": "field",
+              "type": "keyof CompletionContextState"
+            },
+            {
+              "name": "options",
+              "type": "FieldValidationOptions"
+            }
+          ],
+          "isAsync": false,
+          "isExported": true
+        },
+        {
+          "name": "useDebouncedValidation",
+          "params": [
+            {
+              "name": "context",
+              "type": "CompletionContextState"
+            },
+            {
+              "name": "debounceMs",
+              "type": "number"
+            }
+          ],
+          "isAsync": false,
+          "isExported": true
+        }
+      ],
+      "classes": [
+        {
+          "name": "ContextValidator",
+          "isExported": false,
+          "methods": [
+            {
+              "name": "validateContext",
+              "params": [
+                {
+                  "name": "context",
+                  "type": "CompletionContextState"
+                }
+              ],
+              "isAsync": false,
+              "returnType": "ValidationResult",
+              "isStatic": true
+            },
+            {
+              "name": "validateField",
+              "params": [
+                {
+                  "name": "field",
+                  "type": "keyof CompletionContextState"
+                },
+                {
+                  "name": "value",
+                  "type": "unknown"
+                },
+                {
+                  "name": "options",
+                  "type": "FieldValidationOptions"
+                }
+              ],
+              "isAsync": false,
+              "returnType": "ValidationRule[]",
+              "isStatic": true
+            },
+            {
+              "name": "canSubmitContext",
+              "params": [
+                {
+                  "name": "context",
+                  "type": "CompletionContextState"
+                }
+              ],
+              "isAsync": false,
+              "returnType": "boolean",
+              "isStatic": true
+            },
+            {
+              "name": "getValidationSummary",
+              "params": [
+                {
+                  "name": "validation",
+                  "type": "ValidationResult"
+                }
+              ],
+              "isAsync": false,
+              "returnType": "string",
+              "isStatic": true
+            },
+            {
+              "name": "validateContextText",
+              "params": [
+                {
+                  "name": "contextText",
+                  "type": "string",
+                  "optional": true
+                }
+              ],
+              "isAsync": false,
+              "returnType": "ValidationRule[]",
+              "isStatic": true,
+              "isPrivate": true
+            },
+            {
+              "name": "validateDocumentType",
+              "params": [
+                {
+                  "name": "documentType",
+                  "type": "DocumentType",
+                  "optional": true
+                }
+              ],
+              "isAsync": false,
+              "returnType": "ValidationRule[]",
+              "isStatic": true,
+              "isPrivate": true
+            },
+            {
+              "name": "validateLanguage",
+              "params": [
+                {
+                  "name": "language",
+                  "type": "Language",
+                  "optional": true
+                }
+              ],
+              "isAsync": false,
+              "returnType": "ValidationRule[]",
+              "isStatic": true,
+              "isPrivate": true
+            },
+            {
+              "name": "validateTone",
+              "params": [
+                {
+                  "name": "tone",
+                  "type": "Tone",
+                  "optional": true
+                }
+              ],
+              "isAsync": false,
+              "returnType": "ValidationRule[]",
+              "isStatic": true,
+              "isPrivate": true
+            },
+            {
+              "name": "validateAudience",
+              "params": [
+                {
+                  "name": "audience",
+                  "type": "string",
+                  "optional": true
+                }
+              ],
+              "isAsync": false,
+              "returnType": "ValidationRule[]",
+              "isStatic": true,
+              "isPrivate": true
+            },
+            {
+              "name": "validateKeywords",
+              "params": [
+                {
+                  "name": "keywords",
+                  "type": "string[]",
+                  "optional": true
+                }
+              ],
+              "isAsync": false,
+              "returnType": "ValidationRule[]",
+              "isStatic": true,
+              "isPrivate": true
+            },
+            {
+              "name": "validateTokenLimits",
+              "params": [
+                {
+                  "name": "context",
+                  "type": "CompletionContextState"
+                }
+              ],
+              "isAsync": false,
+              "isStatic": true,
+              "isPrivate": true
+            },
+            {
+              "name": "validateContentSafety",
+              "params": [
+                {
+                  "name": "context",
+                  "type": "CompletionContextState"
+                }
+              ],
+              "isAsync": false,
+              "isStatic": true,
+              "isPrivate": true
+            },
+            {
+              "name": "validateDuplicates",
+              "params": [
+                {
+                  "name": "context",
+                  "type": "CompletionContextState"
+                }
+              ],
+              "isAsync": false,
+              "isStatic": true,
+              "isPrivate": true
+            }
+          ],
+          "properties": [
+            {
+              "name": "FIELD_LIMITS",
+              "isStatic": true,
+              "isPrivate": true,
+              "isReadonly": true
+            },
+            {
+              "name": "VALID_DOCUMENT_TYPES",
+              "type": "DocumentType[]",
+              "isStatic": true,
+              "isPrivate": true,
+              "isReadonly": true
+            },
+            {
+              "name": "VALID_LANGUAGES",
+              "type": "Language[]",
+              "isStatic": true,
+              "isPrivate": true,
+              "isReadonly": true
+            },
+            {
+              "name": "VALID_TONES",
+              "type": "Tone[]",
+              "isStatic": true,
+              "isPrivate": true,
+              "isReadonly": true
+            }
+          ]
+        }
+      ],
       "constants": []
     },
     "next.config.js": {

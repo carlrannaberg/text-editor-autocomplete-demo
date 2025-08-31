@@ -45,7 +45,7 @@ export interface FieldValidationOptions {
  */
 class ContextValidator {
   private static readonly FIELD_LIMITS = {
-    contextText: { maxLength: 10000, minLength: 0 },
+    contextText: { minLength: 0 }, // No character limit - using token-based validation instead
     audience: { maxLength: 64, minLength: 0 },
     keywords: { maxCount: 10, maxLength: 32 }
   };
@@ -190,9 +190,7 @@ class ContextValidator {
   private static validateContextText(contextText?: string): ValidationRule[] {
     if (!contextText) return [];
 
-    return this.validateField('contextText', contextText, {
-      maxLength: this.FIELD_LIMITS.contextText.maxLength
-    });
+    return [];
   }
 
   /**
