@@ -32,7 +32,6 @@ export const ErrorNotification: React.FC<ErrorNotificationProps> = ({
   className = ''
 }) => {
   const [isVisible, setIsVisible] = useState(false);
-  const [timeRemaining, setTimeRemaining] = useState(autoDismissMs);
 
   const handleDismiss = useCallback(() => {
     setIsVisible(false);
@@ -45,7 +44,6 @@ export const ErrorNotification: React.FC<ErrorNotificationProps> = ({
   useEffect(() => {
     if (error) {
       setIsVisible(true);
-      setTimeRemaining(autoDismissMs);
     } else {
       setIsVisible(false);
     }
@@ -57,17 +55,11 @@ export const ErrorNotification: React.FC<ErrorNotificationProps> = ({
       return;
     }
 
-    const interval = setInterval(() => {
-      setTimeRemaining(prev => {
-        if (prev <= 100) {
-          handleDismiss();
-          return 0;
-        }
-        return prev - 100;
-      });
-    }, 100);
+    const timeout = setTimeout(() => {
+      handleDismiss();
+    }, autoDismissMs);
 
-    return () => clearInterval(interval);
+    return () => clearTimeout(timeout);
   }, [error, autoDismissMs, handleDismiss]);
 
   const handleRetry = useCallback(() => {
@@ -81,7 +73,6 @@ export const ErrorNotification: React.FC<ErrorNotificationProps> = ({
 
   const recoveryStrategy = ContextErrorHandler.getRecoveryStrategy(error.type);
   const canRetry = error.retryable && onRetry;
-  const progressPercentage = autoDismissMs > 0 ? (timeRemaining / autoDismissMs) * 100 : 0;
 
   // Styling based on error severity
   const getSeverityStyles = (severity: string) => {
@@ -135,28 +126,16 @@ export const ErrorNotification: React.FC<ErrorNotificationProps> = ({
     <div
       className={`
         fixed top-4 right-4 max-w-md w-full z-50 transition-all duration-200
+        rounded-lg border shadow-lg p-4 relative overflow-hidden
         ${isVisible ? 'opacity-100 transform translate-y-0' : 'opacity-0 transform -translate-y-2'}
+        ${styles.container}
         ${className}
       `}
       role="alert"
       aria-live="assertive"
       aria-atomic="true"
     >
-      <div className={`
-        rounded-lg border shadow-lg p-4 relative overflow-hidden
-        ${styles.container}
-      `}>
-        {/* Progress bar for auto-dismiss */}
-        {autoDismissMs > 0 && (
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gray-200">
-            <div 
-              className={`h-full transition-all duration-100 ${styles.progress}`}
-              style={{ width: `${progressPercentage}%` }}
-              aria-hidden="true"
-            />
-          </div>
-        )}
-
+      <div>
         <div className="flex items-start gap-3">
           {/* Error icon */}
           <div className={`flex-shrink-0 ${styles.iconColor} text-lg mt-0.5`}>
@@ -225,13 +204,6 @@ export const ErrorNotification: React.FC<ErrorNotificationProps> = ({
               >
                 Dismiss
               </button>
-
-              {/* Auto-dismiss timer */}
-              {autoDismissMs > 0 && (
-                <span className="text-xs opacity-50 ml-auto">
-                  {Math.ceil(timeRemaining / 1000)}s
-                </span>
-              )}
             </div>
           </div>
 
