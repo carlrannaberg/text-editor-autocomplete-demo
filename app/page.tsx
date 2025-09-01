@@ -191,17 +191,19 @@ const AutocompleteEditor: React.FC = () => {
           <p className="text-lg text-gray-600">Experience AI-powered writing assistance as you type</p>
         </header>
         
-        <ContextPanel />
-        
         <main>
           <div 
             id="editor-main"
-            className="editor-container mb-6"
+            className="editor-container mb-8"
             role="application"
             aria-label="AI-powered text editor with autocomplete suggestions"
           >
             <MenuBar editor={editor} />
             <EditorContent editor={editor} className="editor-content" />
+          </div>
+          
+          <div className="mb-8">
+            <ContextPanel />
           </div>
           
           {/* Editor instructions section */}
