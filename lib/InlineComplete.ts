@@ -63,15 +63,6 @@ export const createContextAwareFetchTail = (getContext?: () => CompletionContext
     try {
       const contextPayload = hasMeaningfulContext(context) && context ? normalizeContextForAPI(context) : undefined;
       
-      // Development-only debug logging
-      if (process.env.NODE_ENV === 'development') {
-        console.group('🔍 Context Transmission Debug');
-        console.log('Input context:', context);
-        console.log('Has meaningful context:', hasMeaningfulContext(context));
-        console.log('Final payload:', contextPayload);
-        console.log('Request body:', JSON.stringify({ left, context: contextPayload }, null, 2));
-        console.groupEnd();
-      }
       
       const response = await fetch('/api/complete', {
         method: 'POST',
@@ -316,7 +307,7 @@ const scheduleCompletion = (
       })
     );
 
-    // Get context for request
+    // Get context for request and pass explicitly to avoid redundant resolution
     const context = getContext?.() || undefined;
     const result = await manager.fetchCompletion(left, context);
     
