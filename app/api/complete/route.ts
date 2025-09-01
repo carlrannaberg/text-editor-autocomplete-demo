@@ -188,6 +188,28 @@ export async function POST(request: NextRequest) {
   try {
     // Basic input validation
     const body = await request.json();
+    
+    // Development-only debug logging for received request
+    if (process.env.NODE_ENV === 'development') {
+      console.group('🔍 API Debug - Request Analysis');
+      console.log('Method:', request.method);
+      console.log('Body:', JSON.stringify(body, null, 2));
+      console.log('Context analysis:', {
+        hasContext: !!body.context,
+        contextKeys: body.context ? Object.keys(body.context) : [],
+        leftLength: body.left?.length || 0,
+        contextFields: body.context ? {
+          userContext: body.context.userContext?.length || 0,
+          documentType: body.context.documentType || 'none',
+          language: body.context.language || 'none',
+          tone: body.context.tone || 'none',
+          audience: body.context.audience?.length || 0,
+          keywords: body.context.keywords?.length || 0
+        } : 'no context'
+      });
+      console.groupEnd();
+    }
+    
     const validation = RequestSchema.safeParse(body);
     
     if (!validation.success) {

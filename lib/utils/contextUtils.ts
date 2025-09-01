@@ -34,14 +34,36 @@ export const hasMeaningfulContext = (context?: CompletionContextState): boolean 
  * @returns Normalized context object for API or undefined if no meaningful context
  */
 export const normalizeContextForAPI = (context: CompletionContextState): object => {
-  return {
-    userContext: context.contextText?.trim() || '',
-    documentType: context.documentType || undefined,
-    language: context.language || undefined,
-    tone: context.tone || undefined,
-    audience: context.audience?.trim() || undefined,
-    keywords: context.keywords && context.keywords.length > 0 ? context.keywords : undefined
-  };
+  // Build payload only including fields with actual values
+  const payload: Record<string, any> = {};
+  
+  // Map contextText to userContext (API field name)
+  if (context.contextText?.trim()) {
+    payload.userContext = context.contextText.trim();
+  }
+  
+  // Only include other fields if they have values
+  if (context.documentType) {
+    payload.documentType = context.documentType;
+  }
+  
+  if (context.language) {
+    payload.language = context.language;
+  }
+  
+  if (context.tone) {
+    payload.tone = context.tone;
+  }
+  
+  if (context.audience?.trim()) {
+    payload.audience = context.audience.trim();
+  }
+  
+  if (context.keywords && context.keywords.length > 0) {
+    payload.keywords = context.keywords;
+  }
+  
+  return payload;
 };
 
 /**
