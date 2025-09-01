@@ -6,7 +6,7 @@ import { z } from 'zod';
 
 // Input validation with optional context
 const ContextSchema = z.object({
-  userContext: z.string().max(20000).optional(),
+  userContext: z.string().max(150000).optional(), // Increased limit for larger contexts (20k tokens + user text)
   documentType: z.enum(['email', 'article', 'note', 'other']).optional(),
   language: z.enum(['en', 'es', 'fr', 'de']).optional(),
   tone: z.enum(['neutral', 'formal', 'casual', 'persuasive']).optional(),

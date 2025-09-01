@@ -304,11 +304,11 @@ describe('Completion API', () => {
       expect(body.type).toBe('INVALID_INPUT');
     });
 
-    test('should enforce 20k character context limit', async () => {
+    test('should enforce 150k character context limit', async () => {
       const request = createMockRequest({
         left: 'test',
         context: {
-          userContext: 'a'.repeat(20001), // Exceeds 20k limit
+          userContext: 'a'.repeat(150001), // Exceeds 150k limit
           documentType: 'article'
         }
       });

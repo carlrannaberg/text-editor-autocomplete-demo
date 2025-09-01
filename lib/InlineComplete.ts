@@ -64,26 +64,44 @@ const generateCacheKey = async (text: string, context?: CompletionContextState):
   }
 };
 
+// Helper function to check if context has any meaningful values
+const hasMeaningfulContext = (context?: CompletionContextState): boolean => {
+  if (!context) return false;
+  
+  return !!(
+    context.contextText?.trim() ||
+    context.documentType ||
+    context.language ||
+    context.tone ||
+    context.audience?.trim() ||
+    (context.keywords && context.keywords.length > 0)
+  );
+};
+
 // Create context-aware fetchTail function
 export const createContextAwareFetchTail = (getContext?: () => CompletionContextState | null): ContextAwareFetchTail => {
   return async (left: string, explicitContext?: CompletionContextState): Promise<ApiResponse> => {
     // Use explicit context if provided, otherwise get from context provider
     const context = explicitContext || getContext?.() || undefined;
     
+    
     try {
+      const contextPayload = hasMeaningfulContext(context) ? {
+        userContext: context!.contextText?.trim() || '',
+        documentType: context!.documentType || undefined,
+        language: context!.language || undefined,
+        tone: context!.tone || undefined,
+        audience: context!.audience?.trim() || undefined,
+        keywords: context!.keywords && context!.keywords.length > 0 ? context!.keywords : undefined
+      } : undefined;
+      
+      
       const response = await fetch('/api/complete', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           left,
-          context: context && context.contextText?.trim() ? {
-            userContext: context.contextText.trim(),
-            documentType: context.documentType || 'other',
-            language: context.language || 'en',
-            tone: context.tone || 'neutral',
-            audience: context.audience?.trim() || '',
-            keywords: context.keywords || []
-          } : undefined
+          context: contextPayload
         }),
         signal: new AbortController().signal, // Individual request controllers are managed by AutocompleteManager
       });
