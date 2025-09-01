@@ -272,8 +272,7 @@ describe('Completion API', () => {
       const request = createMockRequest({
         left: 'Can I',
         context: {
-          userContext: 'Customer service email',
-          tone: 'formal' // Change from 'helpful' to valid enum value
+          userContext: 'Customer service email'
         }
       });
 
@@ -289,10 +288,7 @@ describe('Completion API', () => {
       const request = createMockRequest({
         left: 'test',
         context: {
-          documentType: 'invalid-type', // Should fail validation
-          language: 'xx', // Invalid language code
-          tone: 'invalid-tone',
-          keywords: ['a'.repeat(50)] // Exceeds 32 char limit per keyword
+          userContext: 'a'.repeat(150001) // Exceeds 150k character limit
         }
       });
 
@@ -308,8 +304,7 @@ describe('Completion API', () => {
       const request = createMockRequest({
         left: 'test',
         context: {
-          userContext: 'a'.repeat(150001), // Exceeds 150k limit
-          documentType: 'article'
+          userContext: 'a'.repeat(150001) // Exceeds 150k limit
         }
       });
 
@@ -321,17 +316,24 @@ describe('Completion API', () => {
       expect(body.type).toBe('INVALID_INPUT');
     });
 
-    test('should enforce maximum 10 keywords', async () => {
+    test('should handle valid context within limits', async () => {
+      const mockTextStream = async function* (): AsyncGenerator<string, void, unknown> {
+        yield 'response';
+      };
+
+      mockStreamText.mockResolvedValue({
+        textStream: mockTextStream(),
+      } as MockStreamResponse);
+
       const request = createMockRequest({
         left: 'test',
         context: {
-          userContext: 'test context',
-          keywords: Array(11).fill('keyword') // 11 keywords, should fail
+          userContext: 'test context within valid limits'
         }
       });
 
       const response = await POST(request);
-      expect(response.status).toBe(400);
+      expect(response.status).toBe(200);
     });
 
     test('should sanitize context HTML and control characters', async () => {
@@ -346,9 +348,7 @@ describe('Completion API', () => {
       const request = createMockRequest({
         left: 'test',
         context: {
-          userContext: 'Context with <script>alert("xss")</script> HTML\x00\x1F',
-          audience: 'Users\x0B with control chars',
-          keywords: ['<b>bold</b>', 'normal']
+          userContext: 'Context with <script>alert("xss")</script> HTML\x00\x1F and control chars\x0B'
         }
       });
 
@@ -430,8 +430,7 @@ describe('Completion API', () => {
       const request = createMockRequest({
         left: 'test',
         context: {
-          documentType: 'email', // Only one field provided
-          // Other fields undefined/missing
+          userContext: 'email context' // Only userContext field provided
         }
       });
 

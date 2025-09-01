@@ -38,10 +38,10 @@ describe('ContextPanel Accessibility Compliance Tests', () => {
       renderWithAccessibility();
       
       // Check for context panel region
-      expect(screen.getByRole('region', { name: /document context/i })).toBeInTheDocument();
+      expect(screen.getByRole('region', { name: /writing context/i })).toBeInTheDocument();
       
       // Check for proper heading
-      expect(screen.getByText('Document Context')).toBeInTheDocument();
+      expect(screen.getByText('Writing Context')).toBeInTheDocument();
     });
   });
 
@@ -52,9 +52,8 @@ describe('ContextPanel Accessibility Compliance Tests', () => {
       // Get all focusable elements in the context panel
       const buttons = screen.getAllByRole('button');
       const textboxes = screen.getAllByRole('textbox');
-      const comboboxes = screen.getAllByRole('combobox');
       
-      const focusableElements = [...buttons, ...textboxes, ...comboboxes];
+      const focusableElements = [...buttons, ...textboxes];
       expect(focusableElements.length).toBeGreaterThan(0);
       
       // Each element should be focusable (skip disabled elements)
@@ -82,22 +81,16 @@ describe('ContextPanel Accessibility Compliance Tests', () => {
       }
     });
 
-    it('should handle escape key for dialogs', async () => {
+    it('should support keyboard navigation of textarea', async () => {
       const user = userEvent.setup();
       renderWithAccessibility();
       
-      // Open keyboard help dialog
-      const helpButton = screen.getByRole('button', { name: /keyboard shortcuts help/i });
-      await user.click(helpButton);
+      const textarea = screen.getByRole('textbox', { name: /what are you writing about/i });
+      await user.click(textarea);
+      expect(textarea).toHaveFocus();
       
-      // Check dialog is open
-      expect(screen.getByRole('dialog')).toBeInTheDocument();
-      
-      // Press escape to close
-      await user.keyboard('{Escape}');
-      
-      // Dialog should be closed
-      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+      await user.type(textarea, 'Test content');
+      expect(textarea).toHaveValue('Test content');
     });
   });
 
@@ -106,61 +99,23 @@ describe('ContextPanel Accessibility Compliance Tests', () => {
       renderWithAccessibility();
       
       // Check textarea has proper labeling
-      const textarea = screen.getByRole('textbox', { name: /additional context/i });
+      const textarea = screen.getByRole('textbox', { name: /what are you writing about/i });
       expect(textarea).toHaveAttribute('aria-describedby');
       expect(textarea).toHaveAttribute('id');
-      
-      // Check token count has live region
-      const tokenCount = screen.getByText(/\d+(?:[\s,]\d{3})* \/ 20[\s,]000/);
-      expect(tokenCount).toHaveAttribute('aria-live', 'polite');
-      expect(tokenCount).toHaveAttribute('aria-atomic', 'true');
     });
 
     it('should have proper form labeling', () => {
       renderWithAccessibility();
       
       // All form controls should have labels
-      const selects = screen.getAllByRole('combobox');
-      selects.forEach(select => {
-        expect(select).toHaveAccessibleName();
-        expect(select).toHaveAttribute('aria-describedby');
-      });
-      
       const textInputs = screen.getAllByRole('textbox');
       textInputs.forEach(input => {
         expect(input).toHaveAccessibleName();
       });
-    });
-  });
-
-  describe('Screen Reader Support', () => {
-    it('should have proper ARIA labels and descriptions', () => {
-      renderWithAccessibility();
       
-      // Check textarea has proper labeling
-      const textarea = screen.getByRole('textbox', { name: /additional context/i });
-      expect(textarea).toHaveAttribute('aria-describedby');
-      expect(textarea).toHaveAttribute('id');
-      
-      // Check token count has live region
-      const tokenCount = screen.getByText(/\d+(?:[\s,]\d{3})* \/ 20[\s,]000/);
-      expect(tokenCount).toHaveAttribute('aria-live', 'polite');
-      expect(tokenCount).toHaveAttribute('aria-atomic', 'true');
-    });
-
-    it('should have proper form labeling', () => {
-      renderWithAccessibility();
-      
-      // All form controls should have labels
-      const selects = screen.getAllByRole('combobox');
-      selects.forEach(select => {
-        expect(select).toHaveAccessibleName();
-        expect(select).toHaveAttribute('aria-describedby');
-      });
-      
-      const textInputs = screen.getAllByRole('textbox');
-      textInputs.forEach(input => {
-        expect(input).toHaveAccessibleName();
+      const buttons = screen.getAllByRole('button');
+      buttons.forEach(button => {
+        expect(button).toHaveAccessibleName();
       });
     });
   });
@@ -177,48 +132,34 @@ describe('ContextPanel Accessibility Compliance Tests', () => {
       });
     });
 
-    it('should have progress bar with proper attributes', () => {
-      renderWithAccessibility();
-      
-      const progressBars = document.querySelectorAll('[role="progressbar"]');
-      expect(progressBars.length).toBeGreaterThan(0);
-      
-      progressBars.forEach(progressBar => {
-        expect(progressBar).toHaveAttribute('aria-valuenow');
-        expect(progressBar).toHaveAttribute('aria-valuemin');
-        expect(progressBar).toHaveAttribute('aria-valuemax');
-      });
-    });
   });
 
   describe('Integration Tests', () => {
-    it('should maintain accessibility during state changes', async () => {
+    it('should maintain accessibility during user interactions', async () => {
       const user = userEvent.setup();
       renderWithAccessibility();
       
-      // Test context panel collapse/expand
-      const collapseButton = screen.getByRole('button', { name: /collapse panel/i });
-      expect(collapseButton).toHaveAttribute('aria-expanded', 'true');
+      // Test textarea interaction
+      const textarea = screen.getByRole('textbox', { name: /what are you writing about/i });
+      await user.click(textarea);
+      expect(textarea).toHaveFocus();
       
-      await user.click(collapseButton);
-      expect(collapseButton).toHaveAttribute('aria-expanded', 'false');
+      // Test clear button interaction
+      await user.type(textarea, 'Test content');
+      const clearButton = screen.getByRole('button', { name: /clear/i });
+      expect(clearButton).not.toBeDisabled();
     });
 
     it('should have live regions for announcements', async () => {
       renderWithAccessibility();
       
-      // Check that live regions are properly set up (token count has aria-live)
+      // Check that live regions are properly set up
       const liveRegions = document.querySelectorAll('[aria-live]');
       expect(liveRegions.length).toBeGreaterThan(0);
       
-      // Check that we have at least the token count with aria-live="polite"
+      // Check that we have at least some polite regions
       const politeRegions = document.querySelectorAll('[aria-live="polite"]');
       expect(politeRegions.length).toBeGreaterThan(0);
-      
-      // Verify specific token count live region exists
-      const tokenCount = screen.getByText(/\d+(?:[\s,]\d{3})* \/ 20[\s,]000/);
-      expect(tokenCount).toHaveAttribute('aria-live', 'polite');
-      expect(tokenCount).toHaveAttribute('aria-atomic', 'true');
     });
   });
 });
