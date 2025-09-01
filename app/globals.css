@@ -69,8 +69,7 @@ body {
   .context-panel input:focus,
   .context-panel select:focus,
   .context-panel textarea:focus {
-    outline: 2px solid Highlight !important;
-    outline-offset: 2px !important;
+    outline: none !important;
   }
 }
 
@@ -94,15 +93,16 @@ body {
   }
 }
 
-/* Focus indicators enhancement */
+/* Minimal focus indicators - clean but WCAG compliant */
 button:focus-visible,
 input:focus-visible,
-select:focus-visible,
+select:focus-visible, 
 textarea:focus-visible,
-a:focus-visible,
+a:focus-visible, 
 [tabindex]:focus-visible {
-  outline: 2px solid #3b82f6 !important;
-  outline-offset: 2px !important;
+  outline: none !important;
+  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.15) !important;
+  transition: box-shadow 0.15s ease-in-out;
 }
 
 /* Ensure minimum target size for touch accessibility */

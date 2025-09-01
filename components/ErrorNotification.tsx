@@ -179,7 +179,6 @@ export const ErrorNotification: React.FC<ErrorNotificationProps> = ({
                   onClick={handleRetry}
                   className={`
                     px-3 py-1.5 text-xs font-medium rounded transition-colors
-                    focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-current
                     ${styles.button}
                   `}
                   aria-label="Retry the failed operation"
@@ -193,7 +192,6 @@ export const ErrorNotification: React.FC<ErrorNotificationProps> = ({
                 className="
                   px-3 py-1.5 text-xs font-medium rounded transition-colors
                   bg-transparent border border-current opacity-60 hover:opacity-80
-                  focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-current
                 "
                 aria-label="Dismiss this notification"
               >
@@ -207,7 +205,6 @@ export const ErrorNotification: React.FC<ErrorNotificationProps> = ({
             onClick={handleDismiss}
             className="
               flex-shrink-0 p-1 rounded transition-colors opacity-60 hover:opacity-80
-              focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-current
             "
             aria-label="Close notification"
           >

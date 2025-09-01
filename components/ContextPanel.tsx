@@ -202,7 +202,7 @@ export const ContextPanel: React.FC<ContextPanelProps> = ({
                 placeholder="Describe what you're writing about to get better autocomplete suggestions..."
                 className={`
                   w-full px-3 py-2 border rounded-md shadow-sm
-                  focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+                  focus:outline-none
                   resize-y min-h-[100px]
                   ${isOverLimit 
                     ? 'border-red-300 bg-red-50' 
