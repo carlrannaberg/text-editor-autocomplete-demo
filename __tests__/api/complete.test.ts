@@ -243,12 +243,7 @@ describe('Completion API', () => {
       const request = createMockRequest({
         left: 'Dear client',
         context: {
-          userContext: 'Writing a professional response to a customer complaint',
-          documentType: 'email',
-          language: 'en',
-          tone: 'formal',
-          audience: 'business client',
-          keywords: ['professional', 'response']
+          userContext: 'Writing a professional response to a customer complaint'
         }
       });
 

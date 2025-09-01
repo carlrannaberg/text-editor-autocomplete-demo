@@ -35,7 +35,7 @@ const SYSTEM_BASE_CACHED = `You are an inline autocomplete engine.
 # Quality Guidelines
 - Provide contextually appropriate completions
 - Maintain consistency with the existing text style
-- Consider the document flow and natural language patterns
+- Consider the text flow and natural language patterns
 - Prioritize brevity and relevance`;
 
 const SYSTEM_WITH_CONTEXT_CACHED = `You are an intelligent inline autocomplete engine with contextual awareness.
@@ -43,8 +43,7 @@ const SYSTEM_WITH_CONTEXT_CACHED = `You are an intelligent inline autocomplete e
 # Core Instructions
 - Output ONLY the minimal continuation of the user's text
 - Use the provided context to make more relevant and appropriate suggestions
-- Adapt to the specified document type, tone, language, and target audience
-- Incorporate relevant keywords naturally when appropriate
+- Adapt to the user's writing context and style
 - No introductions, explanations, or complete sentences
 - No punctuation unless it is literally the next character needed
 - Never add quotes, formatting, or trailing whitespace
@@ -53,9 +52,9 @@ const SYSTEM_WITH_CONTEXT_CACHED = `You are an intelligent inline autocomplete e
 # Quality Guidelines
 - Provide contextually appropriate completions
 - Maintain consistency with the existing text style and context
-- Consider the document flow and natural language patterns
+- Consider the text flow and natural language patterns
 - Prioritize brevity and relevance
-- Ensure suggestions align with the specified tone and audience
+- Ensure suggestions align with the user's writing context
 - Use context information to improve completion accuracy`;
 
 // Cache metrics interface for development monitoring

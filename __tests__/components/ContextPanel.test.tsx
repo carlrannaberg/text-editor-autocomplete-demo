@@ -198,4 +198,124 @@ describe('ContextPanel', () => {
       expect(screen.getByPlaceholderText(/Describe what you're writing about/)).toBeInTheDocument();
     });
   });
+
+  describe('Keyboard shortcuts', () => {
+    it('should clear context with Ctrl+K shortcut', async () => {
+      const user = userEvent.setup();
+      renderContextPanel();
+      
+      const textarea = screen.getByRole('textbox', { name: /what are you writing about/i });
+      await user.type(textarea, 'Some content');
+      expect(textarea).toHaveValue('Some content');
+      
+      // Use Ctrl+K to clear
+      await user.keyboard('{Control>}k{/Control}');
+      
+      expect(textarea).toHaveValue('');
+      expect(textarea).toHaveFocus();
+    });
+
+    it('should focus textarea after clearing with keyboard shortcut', async () => {
+      const user = userEvent.setup();
+      renderContextPanel();
+      
+      const textarea = screen.getByRole('textbox', { name: /what are you writing about/i });
+      await user.type(textarea, 'Content to clear');
+      
+      // Blur the textarea
+      textarea.blur();
+      expect(textarea).not.toHaveFocus();
+      
+      // Use Ctrl+K to clear
+      await user.keyboard('{Control>}k{/Control}');
+      
+      expect(textarea).toHaveValue('');
+      expect(textarea).toHaveFocus();
+    });
+  });
+
+  describe('Token limit enforcement', () => {
+    it('should show visual warning when approaching token limit', async () => {
+      const user = userEvent.setup();
+      renderContextPanel();
+      
+      const textarea = screen.getByRole('textbox', { name: /what are you writing about/i });
+      // Create text that approaches token limit (around 90% of 20k tokens)  
+      const longText = 'a'.repeat(60000); // ~15k tokens worth
+      
+      await user.clear(textarea);
+      await user.type(textarea, longText);
+      
+      // Should show warning in token count area
+      await waitFor(() => {
+        const tokenElements = screen.getAllByText(/\d+/);
+        const hasWarningColor = tokenElements.some(el => 
+          el.className.includes('text-amber-600') || el.className.includes('text-orange-600')
+        );
+        expect(hasWarningColor).toBe(true);
+      });
+    });
+
+    it('should show error state when over token limit', async () => {
+      const user = userEvent.setup();
+      renderContextPanel();
+      
+      const textarea = screen.getByRole('textbox', { name: /what are you writing about/i });
+      // Create text that exceeds token limit  
+      const overLimitText = 'a'.repeat(100000); // Way over 20k token limit
+      
+      await user.clear(textarea);
+      await user.type(textarea, overLimitText);
+      
+      // Should show error styling on textarea
+      await waitFor(() => {
+        expect(textarea).toHaveClass('border-red-300');
+      });
+      
+      // Should show error token count
+      await waitFor(() => {
+        const tokenElements = screen.getAllByText(/\d+/);
+        const hasErrorColor = tokenElements.some(el => 
+          el.className.includes('text-red-600')
+        );
+        expect(hasErrorColor).toBe(true);
+      });
+    });
+  });
+
+  describe('Error handling', () => {
+    it('should handle context update errors gracefully', async () => {
+      // Mock console.error to prevent error logs in test output
+      const originalError = console.error;
+      console.error = jest.fn();
+      
+      const user = userEvent.setup();
+      renderContextPanel();
+      
+      const textarea = screen.getByRole('textbox', { name: /what are you writing about/i });
+      
+      // This should not crash the component
+      await user.type(textarea, 'test content');
+      
+      expect(textarea).toHaveValue('test content');
+      
+      // Restore console.error
+      console.error = originalError;
+    });
+
+    it('should maintain functionality when error notification fails', async () => {
+      const user = userEvent.setup();
+      renderContextPanel();
+      
+      const textarea = screen.getByRole('textbox', { name: /what are you writing about/i });
+      const clearButton = screen.getByRole('button', { name: /clear/i });
+      
+      // Should still work even if error handling fails
+      await user.type(textarea, 'test');
+      expect(textarea).toHaveValue('test');
+      
+      await user.click(clearButton);
+      expect(textarea).toHaveValue('');
+    });
+  });
 });

@@ -356,9 +356,7 @@ describe('CompletionContext Hash Generation', () => {
 
       // Mock localStorage with stored context
       const storedContext = {
-        contextText: 'stored text',
-        documentType: 'article',
-        keywords: ['test', 'stored']
+        contextText: 'stored text'
       };
       mockLocalStorage.getItem.mockReturnValue(JSON.stringify(storedContext));
 

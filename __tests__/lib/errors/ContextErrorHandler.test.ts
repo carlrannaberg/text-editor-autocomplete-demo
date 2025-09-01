@@ -61,12 +61,12 @@ describe('ContextErrorHandler', () => {
     });
 
     it('should handle validation errors', () => {
-      const error = ContextErrorHandler.handleValidationError('audience', 'too long text', 'max length');
+      const error = ContextErrorHandler.handleValidationError('userContext', 'too long text', 'max length');
       
       expect(error.type).toBe('VALIDATION_FAILED');
-      expect(error.message).toBe('Validation failed for audience: max length');
+      expect(error.message).toBe('Validation failed for userContext: max length');
       expect(error.severity).toBe('low');
-      expect(error.context).toEqual({ field: 'audience', value: 'too long text', rule: 'max length' });
+      expect(error.context).toEqual({ field: 'userContext', value: 'too long text', rule: 'max length' });
     });
 
     it('should handle token limit errors', () => {

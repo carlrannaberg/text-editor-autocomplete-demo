@@ -42,12 +42,7 @@ describe('Context Transmission Integration', () => {
 
   test('should transmit context from UI to API correctly', async () => {
     const contextPayload = {
-      userContext: 'Claude Code and Codex CLI documentation',
-      documentType: 'article',
-      language: 'en',
-      tone: 'formal',
-      audience: 'developers',
-      keywords: ['CLI', 'documentation']
+      userContext: 'Claude Code and Codex CLI documentation'
     };
 
     const request = createMockRequest({
@@ -121,8 +116,7 @@ describe('Context Transmission Integration', () => {
     const request = createMockRequest({
       left: 'Need',
       context: {
-        userContext: 'Customer service context',
-        tone: 'formal'
+        userContext: 'Customer service context'
       }
     });
 
@@ -155,8 +149,7 @@ describe('Context Transmission Integration', () => {
     const request = createMockRequest({
       left: 'Test',
       context: {
-        userContext: 'a'.repeat(150001), // Exceeds 150k limit
-        documentType: 'invalid-type'
+        userContext: 'a'.repeat(150001) // Exceeds 150k limit
       }
     });
 

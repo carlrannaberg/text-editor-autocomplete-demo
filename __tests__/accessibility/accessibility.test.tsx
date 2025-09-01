@@ -5,7 +5,6 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { axe, toHaveNoViolations } from 'jest-axe';
 import { ContextPanel } from '@/components/ContextPanel';
-import { AccessibleKeywordsInput } from '@/components/AccessibleKeywordsInput';
 import { CompletionContextProvider } from '@/lib/context/CompletionContext';
 
 // Extend Jest matchers

@@ -86,7 +86,6 @@ export const expectTokenCount = (expectedCount: number) => {
 
 export const createMockContextState = (overrides = {}) => ({
   contextText: '',
-  keywords: [],
   ...overrides
 });
 

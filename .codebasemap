@@ -2,9 +2,9 @@
   "metadata": {
     "version": 1,
     "root": "/Users/carl/Development/agents/text-editor-autocomplete-demo",
-    "createdAt": "2025-08-31T19:04:59.278Z",
-    "updatedAt": "2025-08-31T19:04:59.278Z",
-    "totalFiles": 37
+    "createdAt": "2025-09-01T18:27:45.644Z",
+    "updatedAt": "2025-09-01T18:27:45.644Z",
+    "totalFiles": 39
   },
   "tree": {
     "name": "text-editor-autocomplete-demo",
@@ -62,6 +62,16 @@
             "children": [
               {
                 "name": "useKeyboardShortcuts.test.ts",
+                "type": "file"
+              }
+            ]
+          },
+          {
+            "name": "integration",
+            "type": "dir",
+            "children": [
+              {
+                "name": "context-transmission.test.ts",
                 "type": "file"
               }
             ]
@@ -223,6 +233,16 @@
             ]
           },
           {
+            "name": "utils",
+            "type": "dir",
+            "children": [
+              {
+                "name": "contextUtils.ts",
+                "type": "file"
+              }
+            ]
+          },
+          {
             "name": "validation",
             "type": "dir",
             "children": [
@@ -276,6 +296,7 @@
     "__tests__/components/ErrorNotification.test.tsx",
     "__tests__/components/KeyboardShortcutsHelp.test.tsx",
     "__tests__/hooks/useKeyboardShortcuts.test.ts",
+    "__tests__/integration/context-transmission.test.ts",
     "__tests__/lib/InlineComplete.test.ts",
     "__tests__/lib/cache-optimization.test.ts",
     "__tests__/lib/context/CompletionContext.test.tsx",
@@ -302,6 +323,7 @@
     "lib/hooks/useTokenMonitoring.ts",
     "lib/tokenizer.ts",
     "lib/types.ts",
+    "lib/utils/contextUtils.ts",
     "lib/validation/contextValidation.ts",
     "next.config.js",
     "postcss.config.js",
@@ -325,6 +347,10 @@
       "to": "__tests__/utils/test-helpers.tsx"
     },
     {
+      "from": "__tests__/integration/context-transmission.test.ts",
+      "to": "__tests__/utils/test-helpers.tsx"
+    },
+    {
       "from": "__tests__/lib/context/CompletionContext.test.tsx",
       "to": "__tests__/utils/test-helpers.tsx"
     },
@@ -335,6 +361,10 @@
     {
       "from": "lib/InlineComplete.ts",
       "to": "lib/types.ts"
+    },
+    {
+      "from": "lib/InlineComplete.ts",
+      "to": "lib/utils/contextUtils.ts"
     }
   ],
   "files": {
@@ -641,6 +671,32 @@
           "isExported": false
         }
       ]
+    },
+    "__tests__/integration/context-transmission.test.ts": {
+      "imports": [
+        {
+          "from": "@/app/api/complete/route",
+          "kind": "import"
+        },
+        {
+          "from": "ai",
+          "kind": "import"
+        },
+        {
+          "from": "next/server",
+          "kind": "import"
+        },
+        {
+          "from": "../utils/test-helpers",
+          "kind": "import"
+        }
+      ],
+      "dependencies": [
+        "__tests__/utils/test-helpers.tsx"
+      ],
+      "functions": [],
+      "classes": [],
+      "constants": []
     },
     "__tests__/lib/InlineComplete.test.ts": {
       "imports": [
@@ -980,7 +1036,8 @@
           "kind": "import",
           "isDefault": true,
           "imported": [
-            "useEffect"
+            "useEffect",
+            "useRef"
           ]
         },
         {
@@ -1023,6 +1080,20 @@
           "kind": "import",
           "imported": [
             "useAccessibility"
+          ]
+        },
+        {
+          "from": "@/lib/types",
+          "kind": "import",
+          "imported": [
+            "CompletionContextState"
+          ]
+        },
+        {
+          "from": "@/lib/utils/contextUtils",
+          "kind": "import",
+          "imported": [
+            "createContextSnapshot"
           ]
         }
       ],
@@ -1209,8 +1280,7 @@
             "useState",
             "useCallback",
             "useEffect",
-            "useRef",
-            "useMemo"
+            "useRef"
           ]
         },
         {
@@ -1218,16 +1288,6 @@
           "kind": "import",
           "imported": [
             "useCompletionContext"
-          ]
-        },
-        {
-          "from": "@/lib/types",
-          "kind": "import",
-          "imported": [
-            "DocumentType",
-            "Language",
-            "Tone",
-            "CompletionContextState"
           ]
         },
         {
@@ -1256,39 +1316,6 @@
           "kind": "import",
           "imported": [
             "useContextErrorHandling"
-          ]
-        },
-        {
-          "from": "@/lib/validation/contextValidation",
-          "kind": "import",
-          "imported": [
-            "ContextValidator",
-            "useDebouncedValidation",
-            "ValidationResult"
-          ]
-        },
-        {
-          "from": "@/lib/hooks/useKeyboardShortcuts",
-          "kind": "import",
-          "imported": [
-            "useKeyboardShortcuts",
-            "useEscapeKey",
-            "useFocusManagement",
-            "KeyboardShortcut"
-          ]
-        },
-        {
-          "from": "@/components/KeyboardShortcutsHelp",
-          "kind": "import",
-          "imported": [
-            "KeyboardShortcutsHelp"
-          ]
-        },
-        {
-          "from": "@/components/AccessibleKeywordsInput",
-          "kind": "import",
-          "imported": [
-            "AccessibleKeywordsInput"
           ]
         },
         {
@@ -1448,10 +1475,15 @@
         {
           "from": "./types",
           "kind": "import"
+        },
+        {
+          "from": "./utils/contextUtils",
+          "kind": "import"
         }
       ],
       "dependencies": [
-        "lib/types.ts"
+        "lib/types.ts",
+        "lib/utils/contextUtils.ts"
       ],
       "functions": [],
       "classes": [],
@@ -1476,10 +1508,7 @@
           "kind": "import",
           "imported": [
             "CompletionContextState",
-            "CompletionContextValue",
-            "DocumentType",
-            "Language",
-            "Tone"
+            "CompletionContextValue"
           ]
         },
         {
@@ -2182,6 +2211,42 @@
       "classes": [],
       "constants": []
     },
+    "lib/utils/contextUtils.ts": {
+      "imports": [
+        {
+          "from": "@/lib/types",
+          "kind": "import",
+          "imported": [
+            "CompletionContextState"
+          ]
+        }
+      ],
+      "dependencies": [],
+      "functions": [],
+      "classes": [],
+      "constants": [
+        {
+          "name": "hasMeaningfulContext",
+          "initKind": "function",
+          "isExported": true
+        },
+        {
+          "name": "normalizeContextForAPI",
+          "initKind": "function",
+          "isExported": true
+        },
+        {
+          "name": "normalizeContextForCache",
+          "initKind": "function",
+          "isExported": true
+        },
+        {
+          "name": "createContextSnapshot",
+          "initKind": "function",
+          "isExported": true
+        }
+      ]
+    },
     "lib/validation/contextValidation.ts": {
       "imports": [
         {
@@ -2193,10 +2258,7 @@
           "from": "@/lib/types",
           "kind": "import",
           "imported": [
-            "CompletionContextState",
-            "DocumentType",
-            "Language",
-            "Tone"
+            "CompletionContextState"
           ]
         },
         {
@@ -2321,76 +2383,6 @@
               "isPrivate": true
             },
             {
-              "name": "validateDocumentType",
-              "params": [
-                {
-                  "name": "documentType",
-                  "type": "DocumentType",
-                  "optional": true
-                }
-              ],
-              "isAsync": false,
-              "returnType": "ValidationRule[]",
-              "isStatic": true,
-              "isPrivate": true
-            },
-            {
-              "name": "validateLanguage",
-              "params": [
-                {
-                  "name": "language",
-                  "type": "Language",
-                  "optional": true
-                }
-              ],
-              "isAsync": false,
-              "returnType": "ValidationRule[]",
-              "isStatic": true,
-              "isPrivate": true
-            },
-            {
-              "name": "validateTone",
-              "params": [
-                {
-                  "name": "tone",
-                  "type": "Tone",
-                  "optional": true
-                }
-              ],
-              "isAsync": false,
-              "returnType": "ValidationRule[]",
-              "isStatic": true,
-              "isPrivate": true
-            },
-            {
-              "name": "validateAudience",
-              "params": [
-                {
-                  "name": "audience",
-                  "type": "string",
-                  "optional": true
-                }
-              ],
-              "isAsync": false,
-              "returnType": "ValidationRule[]",
-              "isStatic": true,
-              "isPrivate": true
-            },
-            {
-              "name": "validateKeywords",
-              "params": [
-                {
-                  "name": "keywords",
-                  "type": "string[]",
-                  "optional": true
-                }
-              ],
-              "isAsync": false,
-              "returnType": "ValidationRule[]",
-              "isStatic": true,
-              "isPrivate": true
-            },
-            {
               "name": "validateTokenLimits",
               "params": [
                 {
@@ -2430,27 +2422,6 @@
           "properties": [
             {
               "name": "FIELD_LIMITS",
-              "isStatic": true,
-              "isPrivate": true,
-              "isReadonly": true
-            },
-            {
-              "name": "VALID_DOCUMENT_TYPES",
-              "type": "DocumentType[]",
-              "isStatic": true,
-              "isPrivate": true,
-              "isReadonly": true
-            },
-            {
-              "name": "VALID_LANGUAGES",
-              "type": "Language[]",
-              "isStatic": true,
-              "isPrivate": true,
-              "isReadonly": true
-            },
-            {
-              "name": "VALID_TONES",
-              "type": "Tone[]",
               "isStatic": true,
               "isPrivate": true,
               "isReadonly": true
