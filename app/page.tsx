@@ -194,7 +194,7 @@ const AutocompleteEditor: React.FC = () => {
         <main>
           <div 
             id="editor-main"
-            className="editor-container"
+            className="editor-container mb-4"
             role="application"
             aria-label="AI-powered text editor with autocomplete suggestions"
           >
