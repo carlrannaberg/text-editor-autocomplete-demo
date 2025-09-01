@@ -194,7 +194,7 @@ const AutocompleteEditor: React.FC = () => {
         <main>
           <div 
             id="editor-main"
-            className="editor-container mb-8"
+            className="editor-container"
             role="application"
             aria-label="AI-powered text editor with autocomplete suggestions"
           >
@@ -202,50 +202,21 @@ const AutocompleteEditor: React.FC = () => {
             <EditorContent editor={editor} className="editor-content" />
           </div>
           
+          {/* Editor shortcuts */}
+          <div className="flex items-center justify-center gap-8 text-sm text-gray-500 mb-8">
+            <div className="flex items-center gap-2">
+              <kbd className="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-xs font-mono shadow-sm">Tab</kbd>
+              <span>Accept suggestion</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <kbd className="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-xs font-mono shadow-sm">Esc</kbd>
+              <span>Dismiss</span>
+            </div>
+          </div>
+          
           <div className="mb-8">
             <ContextPanel />
           </div>
-          
-          {/* Editor instructions section */}
-          <section aria-labelledby="editor-help-heading">
-            <h2 id="editor-help-heading" className="sr-only">Editor keyboard shortcuts and help</h2>
-            
-            <div className="space-y-4">
-              {/* Editor shortcuts */}
-              <div className="flex items-center justify-center gap-8 text-sm text-gray-500">
-                <div className="flex items-center gap-2">
-                  <kbd className="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-xs font-mono shadow-sm">Tab</kbd>
-                  <span>Accept suggestion</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <kbd className="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-xs font-mono shadow-sm">Esc</kbd>
-                  <span>Dismiss</span>
-                </div>
-              </div>
-              
-              {/* Context panel shortcuts */}
-              <div className="flex items-center justify-center gap-6 text-xs text-gray-400">
-                <div className="flex items-center gap-1.5">
-                  <kbd className="px-2 py-1 bg-gray-100 border border-gray-200 rounded text-xs font-mono shadow-sm">
-                    Ctrl+Shift+C
-                  </kbd>
-                  <span>Toggle context</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <kbd className="px-2 py-1 bg-gray-100 border border-gray-200 rounded text-xs font-mono shadow-sm">
-                    Ctrl+Shift+/
-                  </kbd>
-                  <span>Focus context</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <kbd className="px-2 py-1 bg-gray-100 border border-gray-200 rounded text-xs font-mono shadow-sm">
-                    Ctrl+Shift+?
-                  </kbd>
-                  <span>Shortcuts help</span>
-                </div>
-              </div>
-            </div>
-          </section>
         </main>
       </div>
     </div>
