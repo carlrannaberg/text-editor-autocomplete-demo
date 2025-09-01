@@ -20,12 +20,15 @@ interface ContextPanelProps {
   onToggleCollapse?: (collapsed: boolean) => void;
   /** Whether keyboard shortcuts are enabled (default: true) */
   keyboardShortcutsEnabled?: boolean;
+  /** Custom CSS classes for the container */
+  className?: string;
 }
 
 export const ContextPanel: React.FC<ContextPanelProps> = ({
   isCollapsed = false,
   onToggleCollapse,
-  keyboardShortcutsEnabled = true
+  keyboardShortcutsEnabled = true,
+  className = ''
 }) => {
   const { 
     contextText, 
@@ -103,7 +106,7 @@ export const ContextPanel: React.FC<ContextPanelProps> = ({
 
   return (
     <div 
-      className="bg-white border rounded-lg shadow-sm"
+      className={`bg-white border rounded-lg shadow-sm ${className}`}
       role="region"
       aria-label="Writing Context"
     >

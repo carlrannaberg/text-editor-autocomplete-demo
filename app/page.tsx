@@ -192,31 +192,39 @@ const AutocompleteEditor: React.FC = () => {
         </header>
         
         <main>
-          <div 
-            id="editor-main"
-            className="editor-container mb-4"
-            role="application"
-            aria-label="AI-powered text editor with autocomplete suggestions"
-          >
-            <MenuBar editor={editor} />
-            <EditorContent editor={editor} className="editor-content" />
-          </div>
-          
-          {/* Editor shortcuts */}
-          <div className="flex items-center justify-center gap-8 text-sm text-gray-500 mb-8">
-            <div className="flex items-center gap-2">
-              <kbd className="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-xs font-mono shadow-sm">Tab</kbd>
-              <span>Accept suggestion</span>
+          <section aria-labelledby="editor-section">
+            <h2 id="editor-section" className="sr-only">Text Editor</h2>
+            <div 
+              id="editor-main"
+              className="editor-container mb-4"
+              role="application"
+              aria-label="AI-powered text editor with autocomplete suggestions"
+            >
+              <MenuBar editor={editor} />
+              <EditorContent editor={editor} className="editor-content" />
             </div>
-            <div className="flex items-center gap-2">
-              <kbd className="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-xs font-mono shadow-sm">Esc</kbd>
-              <span>Dismiss</span>
+            
+            {/* Editor shortcuts as part of editor section */}
+            <div className="flex items-center justify-center gap-8 text-sm text-gray-500 mb-8">
+              <div className="flex items-center gap-2">
+                <kbd className="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-xs font-mono shadow-sm">Tab</kbd>
+                <span>Accept suggestion</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <kbd className="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-xs font-mono shadow-sm">Esc</kbd>
+                <span>Dismiss</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <kbd className="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-xs font-mono shadow-sm">Ctrl+K</kbd>
+                <span>Clear context</span>
+              </div>
             </div>
-          </div>
-          
-          <div className="mb-8">
-            <ContextPanel />
-          </div>
+          </section>
+
+          <section aria-labelledby="context-section">
+            <h2 id="context-section" className="sr-only">Writing Context</h2>
+            <ContextPanel className="mb-8" />
+          </section>
         </main>
       </div>
     </div>
