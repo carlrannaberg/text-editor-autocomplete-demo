@@ -7,6 +7,7 @@ import { useCompletionContext } from '@/lib/context/CompletionContext';
 import { ContextPanel } from '@/components/ContextPanel';
 import { useAccessibility } from '@/lib/hooks/useAccessibility';
 import type { CompletionContextState } from '@/lib/types';
+import { createContextSnapshot } from '@/lib/utils/contextUtils';
 
 const MenuButton = ({ 
   onClick,
@@ -139,25 +140,7 @@ const AutocompleteEditor: React.FC = () => {
         debounceMs: 120,
         maxPrefixLength: 1000,
         enabled: true,
-        getContext: () => {
-          // Extract only the state portion, not the methods
-          const { 
-            contextText, 
-            documentType, 
-            language, 
-            tone, 
-            audience, 
-            keywords 
-          } = completionContext;
-          return { 
-            contextText: contextText || '', 
-            documentType, 
-            language, 
-            tone, 
-            audience, 
-            keywords 
-          } as CompletionContextState;
-        },
+        getContext: () => createContextSnapshot(completionContext),
       }),
     ],
     content: '',

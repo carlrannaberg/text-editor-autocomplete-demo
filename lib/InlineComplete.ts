@@ -3,6 +3,7 @@ import { Extension } from '@tiptap/core';
 import { Plugin, PluginKey } from 'prosemirror-state';
 import { Decoration, DecorationSet, EditorView } from 'prosemirror-view';
 import { InlineCompleteOptions, InlineCompleteState, ApiResponse, CompletionText, CompletionContextState } from './types';
+import { hasMeaningfulContext, normalizeContextForAPI, normalizeContextForCache } from './utils/contextUtils';
 
 // Heuristic: when at punctuation boundary with no space, prefix a space
 function maybePrefixSpace(left: string, suggestion: string): string {
@@ -25,24 +26,11 @@ function maybePrefixSpace(left: string, suggestion: string): string {
 // Context-aware fetch function type
 type ContextAwareFetchTail = (left: string, context?: CompletionContextState) => Promise<ApiResponse>;
 
-// Context normalization for cache keys
-const normalizeContext = (context?: CompletionContextState) => {
-  if (!context) return '';
-  
-  return JSON.stringify({
-    contextText: context.contextText?.trim() || '',
-    documentType: context.documentType || '',
-    language: context.language || '',
-    tone: context.tone || '',
-    audience: context.audience?.trim() || '',
-    keywords: context.keywords?.sort().join(',') || ''
-  });
-};
-
 // Generate cache key with context hash
 const generateCacheKey = async (text: string, context?: CompletionContextState): Promise<string> => {
-  const contextStr = normalizeContext(context);
-  if (!contextStr) return text; // No context, use simple text key
+  if (!context) return text; // No context, use simple text key
+  
+  const contextStr = JSON.stringify(normalizeContextForCache(context));
   
   try {
     const encoder = new TextEncoder();
@@ -64,19 +52,6 @@ const generateCacheKey = async (text: string, context?: CompletionContextState):
   }
 };
 
-// Helper function to check if context has any meaningful values
-const hasMeaningfulContext = (context?: CompletionContextState): boolean => {
-  if (!context) return false;
-  
-  return !!(
-    context.contextText?.trim() ||
-    context.documentType ||
-    context.language ||
-    context.tone ||
-    context.audience?.trim() ||
-    (context.keywords && context.keywords.length > 0)
-  );
-};
 
 // Create context-aware fetchTail function
 export const createContextAwareFetchTail = (getContext?: () => CompletionContextState | null): ContextAwareFetchTail => {
@@ -86,14 +61,7 @@ export const createContextAwareFetchTail = (getContext?: () => CompletionContext
     
     
     try {
-      const contextPayload = hasMeaningfulContext(context) ? {
-        userContext: context!.contextText?.trim() || '',
-        documentType: context!.documentType || undefined,
-        language: context!.language || undefined,
-        tone: context!.tone || undefined,
-        audience: context!.audience?.trim() || undefined,
-        keywords: context!.keywords && context!.keywords.length > 0 ? context!.keywords : undefined
-      } : undefined;
+      const contextPayload = hasMeaningfulContext(context) && context ? normalizeContextForAPI(context) : undefined;
       
       
       const response = await fetch('/api/complete', {
