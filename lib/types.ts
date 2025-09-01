@@ -4,21 +4,11 @@
 export type ValidatedText = string;
 export type CompletionText = string;
 
-// Context-related types
-export type DocumentType = 'email' | 'article' | 'note' | 'other';
-export type Language = 'en' | 'es' | 'fr' | 'de';
-export type Tone = 'neutral' | 'formal' | 'casual' | 'persuasive';
-
 /**
- * State interface for completion context
+ * State interface for completion context - simplified to just context text
  */
 export interface CompletionContextState {
   contextText: string;
-  documentType?: DocumentType;
-  language?: Language;
-  tone?: Tone;
-  audience?: string;
-  keywords?: string[];
 }
 
 /**
@@ -44,17 +34,7 @@ export interface CompletionRequest {
   requestId?: string;
   /** Additional context to improve completion quality */
   context?: {
-    /** Type of document being edited */
-    documentType?: DocumentType;
-    /** Language for completion generation */
-    language?: Language;
-    /** Writing tone preference */
-    tone?: Tone;
-    /** Target audience description */
-    audience?: string;
-    /** Relevant keywords for completion */
-    keywords?: string[];
-    /** Additional user-provided context */
+    /** Context text describing what the user is writing about */
     userContext?: string;
   };
 }

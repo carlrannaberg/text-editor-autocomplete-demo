@@ -187,10 +187,9 @@ describe('CompletionContext Hash Generation', () => {
             <div data-testid="hash-2">{hash2}</div>
             <button
               onClick={async () => {
-                // Set context with trimming needed and unsorted keywords
+                // Set context with trimming needed
                 context.updateContext({
-                  contextText: '  test context  ',
-                  keywords: ['zebra', 'alpha', 'beta']
+                  contextText: '  test context  '
                 });
                 const hash = await context.getContextHash();
                 setHash1(hash);
@@ -201,10 +200,9 @@ describe('CompletionContext Hash Generation', () => {
             </button>
             <button
               onClick={async () => {
-                // Set same context but pre-trimmed and sorted
+                // Set same context but pre-trimmed
                 context.updateContext({
-                  contextText: 'test context',
-                  keywords: ['alpha', 'beta', 'zebra']
+                  contextText: 'test context'
                 });
                 const hash = await context.getContextHash();
                 setHash2(hash);
@@ -282,12 +280,7 @@ describe('CompletionContext Hash Generation', () => {
             <button
               onClick={async () => {
                 context.updateContext({
-                  contextText: 'full context test',
-                  documentType: 'email',
-                  language: 'en',
-                  tone: 'formal',
-                  audience: 'business clients',
-                  keywords: ['professional', 'meeting']
+                  contextText: 'full context test'
                 });
                 const contextHash = await context.getContextHash();
                 setHash(contextHash);

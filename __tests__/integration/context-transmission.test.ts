@@ -92,24 +92,20 @@ describe('Context Transmission Integration', () => {
     );
   });
 
-  test('should handle context with only non-text fields', async () => {
+  test('should handle context with userContext text', async () => {
     const request = createMockRequest({
       left: 'Technical',
       context: {
-        documentType: 'article',
-        language: 'en',
-        tone: 'formal'
+        userContext: 'Writing a formal technical article for software engineers'
       }
     });
 
     const response = await POST(request);
     expect(response.status).toBe(200);
     
-    // Verify context fields were processed
+    // Verify context was processed
     const aiCall = mockStreamText.mock.calls[0][0];
-    expect(aiCall.prompt).toContain('Document Type: article');
-    expect(aiCall.prompt).toContain('Language: en');
-    expect(aiCall.prompt).toContain('Tone: formal');
+    expect(aiCall.prompt).toContain('Writing a formal technical article for software engineers');
   });
 
   test('should boost confidence for contextual short completions', async () => {
@@ -176,9 +172,7 @@ describe('Context Transmission Integration', () => {
     const request = createMockRequest({
       left: 'Safe',
       context: {
-        userContext: 'Context with <script>alert("xss")</script> HTML\x00\x1F',
-        audience: 'Users\x0B with control chars',
-        keywords: ['<b>bold</b>', 'normal']
+        userContext: 'Context with <script>alert("xss")</script> HTML\x00\x1F and users\x0B with control chars'
       }
     });
 
@@ -191,13 +185,11 @@ describe('Context Transmission Integration', () => {
     
     // Context should be sanitized in the prompt
     expect(promptText).not.toContain('<script>');
-    expect(promptText).not.toContain('<b>');
     expect(promptText).not.toContain('\x00');
     expect(promptText).not.toContain('\x0B');
     
     // But should contain the cleaned content
-    expect(promptText).toContain('Context with alert("xss") HTML');
-    expect(promptText).toContain('Users with control chars');
+    expect(promptText).toContain('Context with alert("xss") HTML and users with control chars');
   });
 
   test('should use extended timeout for context requests', async () => {

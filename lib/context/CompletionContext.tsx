@@ -3,10 +3,7 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import type {
   CompletionContextState,
-  CompletionContextValue,
-  DocumentType,
-  Language,
-  Tone
+  CompletionContextValue
 } from '@/lib/types';
 import { ContextErrorHandler, type ContextError } from '@/lib/errors/ContextErrorHandler';
 import { 
@@ -18,12 +15,7 @@ import {
 
 // Context normalization for stable hashing
 const normalizeContext = (context: CompletionContextState) => ({
-  userContext: context.contextText?.trim() || '',
-  documentType: context.documentType || '',
-  language: context.language || '',
-  tone: context.tone || '',
-  audience: context.audience?.trim() || '',
-  keywords: context.keywords?.sort().join(',') || ''
+  userContext: context.contextText?.trim() || ''
 });
 
 // Structured error handling
@@ -99,8 +91,7 @@ const loadFromLocalStorage = (): CompletionContextState => {
 };
 
 const getDefaultContext = (): CompletionContextState => ({
-  contextText: '',
-  keywords: []
+  contextText: ''
 });
 
 // Create the context

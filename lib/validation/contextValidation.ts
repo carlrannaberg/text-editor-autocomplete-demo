@@ -1,7 +1,7 @@
 // lib/validation/contextValidation.ts
 
 import React from 'react';
-import { CompletionContextState, DocumentType, Language, Tone } from '@/lib/types';
+import { CompletionContextState } from '@/lib/types';
 import { getContextTokenCount, MAX_TOKEN_LIMIT } from '@/lib/tokenizer';
 
 /**
@@ -45,14 +45,8 @@ export interface FieldValidationOptions {
  */
 class ContextValidator {
   private static readonly FIELD_LIMITS = {
-    contextText: { minLength: 0 }, // No character limit - using token-based validation instead
-    audience: { maxLength: 64, minLength: 0 },
-    keywords: { maxCount: 10, maxLength: 32 }
+    contextText: { minLength: 0 } // No character limit - using token-based validation instead
   };
-
-  private static readonly VALID_DOCUMENT_TYPES: DocumentType[] = ['email', 'article', 'note', 'other'];
-  private static readonly VALID_LANGUAGES: Language[] = ['en', 'es', 'fr', 'de'];
-  private static readonly VALID_TONES: Tone[] = ['neutral', 'formal', 'casual', 'persuasive'];
 
   /**
    * Validate entire context state
@@ -64,11 +58,6 @@ class ContextValidator {
 
     // Validate individual fields
     errors.push(...this.validateContextText(context.contextText));
-    errors.push(...this.validateDocumentType(context.documentType));
-    errors.push(...this.validateLanguage(context.language));
-    errors.push(...this.validateTone(context.tone));
-    errors.push(...this.validateAudience(context.audience));
-    errors.push(...this.validateKeywords(context.keywords));
 
     // Validate token limits
     const tokenValidation = this.validateTokenLimits(context);
@@ -193,118 +182,6 @@ class ContextValidator {
     return [];
   }
 
-  /**
-   * Validate document type field
-   */
-  private static validateDocumentType(documentType?: DocumentType): ValidationRule[] {
-    if (!documentType) return [];
-
-    const errors: ValidationRule[] = [];
-
-    if (!this.VALID_DOCUMENT_TYPES.includes(documentType)) {
-      errors.push({
-        field: 'documentType',
-        rule: 'invalid_value',
-        message: `Document type must be one of: ${this.VALID_DOCUMENT_TYPES.join(', ')}`,
-        severity: 'error'
-      });
-    }
-
-    return errors;
-  }
-
-  /**
-   * Validate language field
-   */
-  private static validateLanguage(language?: Language): ValidationRule[] {
-    if (!language) return [];
-
-    const errors: ValidationRule[] = [];
-
-    if (!this.VALID_LANGUAGES.includes(language)) {
-      errors.push({
-        field: 'language',
-        rule: 'invalid_value',
-        message: `Language must be one of: ${this.VALID_LANGUAGES.join(', ')}`,
-        severity: 'error'
-      });
-    }
-
-    return errors;
-  }
-
-  /**
-   * Validate tone field
-   */
-  private static validateTone(tone?: Tone): ValidationRule[] {
-    if (!tone) return [];
-
-    const errors: ValidationRule[] = [];
-
-    if (!this.VALID_TONES.includes(tone)) {
-      errors.push({
-        field: 'tone',
-        rule: 'invalid_value',
-        message: `Tone must be one of: ${this.VALID_TONES.join(', ')}`,
-        severity: 'error'
-      });
-    }
-
-    return errors;
-  }
-
-  /**
-   * Validate audience field
-   */
-  private static validateAudience(audience?: string): ValidationRule[] {
-    if (!audience) return [];
-
-    return this.validateField('audience', audience, {
-      maxLength: this.FIELD_LIMITS.audience.maxLength
-    });
-  }
-
-  /**
-   * Validate keywords field
-   */
-  private static validateKeywords(keywords?: string[]): ValidationRule[] {
-    if (!keywords || keywords.length === 0) return [];
-
-    const errors: ValidationRule[] = [];
-
-    // Check array length
-    if (keywords.length > this.FIELD_LIMITS.keywords.maxCount) {
-      errors.push({
-        field: 'keywords',
-        rule: 'max_count',
-        message: `Maximum ${this.FIELD_LIMITS.keywords.maxCount} keywords allowed`,
-        severity: 'error'
-      });
-    }
-
-    // Check individual keyword length
-    keywords.forEach((keyword, index) => {
-      if (keyword.length > this.FIELD_LIMITS.keywords.maxLength) {
-        errors.push({
-          field: 'keywords',
-          rule: 'keyword_too_long',
-          message: `Keyword ${index + 1} exceeds ${this.FIELD_LIMITS.keywords.maxLength} characters`,
-          severity: 'error'
-        });
-      }
-
-      if (keyword.trim() === '') {
-        errors.push({
-          field: 'keywords',
-          rule: 'empty_keyword',
-          message: `Keyword ${index + 1} cannot be empty`,
-          severity: 'error'
-        });
-      }
-    });
-
-    return errors;
-  }
 
   /**
    * Validate token limits with progressive warnings
@@ -373,16 +250,6 @@ class ContextValidator {
       checkContent(context.contextText, 'contextText');
     }
 
-    if (context.audience) {
-      checkContent(context.audience, 'audience');
-    }
-
-    if (context.keywords) {
-      context.keywords.forEach(keyword => {
-        checkContent(keyword, 'keywords');
-      });
-    }
-
     return { errors, warnings };
   }
 
@@ -391,22 +258,6 @@ class ContextValidator {
    */
   private static validateDuplicates(context: CompletionContextState) {
     const warnings: ValidationRule[] = [];
-
-    if (context.keywords && context.keywords.length > 1) {
-      const duplicates = context.keywords.filter((keyword, index) => 
-        context.keywords?.indexOf(keyword) !== index
-      );
-
-      if (duplicates.length > 0) {
-        warnings.push({
-          field: 'keywords',
-          rule: 'duplicate_keywords',
-          message: `Duplicate keywords found: ${duplicates.join(', ')}`,
-          severity: 'warning'
-        });
-      }
-    }
-
     return { warnings };
   }
 }

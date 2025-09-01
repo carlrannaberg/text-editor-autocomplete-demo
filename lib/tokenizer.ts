@@ -91,39 +91,12 @@ export function getTokenCount(text: string): number {
  * @returns Total token count for all context fields
  */
 export function getContextTokenCount(context: CompletionContextState): number {
-  let totalTokens = 0;
-
-  // Context text (main field)
+  // Context text (only field)
   if (context.contextText) {
-    totalTokens += getTokenCount(context.contextText);
+    return getTokenCount(context.contextText);
   }
 
-  // Document type (minimal tokens)
-  if (context.documentType) {
-    totalTokens += 2; // e.g., "email", "article"
-  }
-
-  // Language (minimal tokens)
-  if (context.language) {
-    totalTokens += 2; // e.g., "en", "es"
-  }
-
-  // Tone (minimal tokens)
-  if (context.tone) {
-    totalTokens += 2; // e.g., "formal", "casual"
-  }
-
-  // Audience (variable length)
-  if (context.audience) {
-    totalTokens += getTokenCount(context.audience);
-  }
-
-  // Keywords (sum of all keyword tokens)
-  if (context.keywords && context.keywords.length > 0) {
-    totalTokens += context.keywords.reduce((sum, keyword) => sum + getTokenCount(keyword), 0);
-  }
-
-  return totalTokens;
+  return 0;
 }
 
 /**

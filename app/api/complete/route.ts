@@ -6,12 +6,7 @@ import { z } from 'zod';
 
 // Input validation with optional context
 const ContextSchema = z.object({
-  userContext: z.string().max(150000).optional(), // Increased limit for larger contexts (20k tokens + user text)
-  documentType: z.enum(['email', 'article', 'note', 'other']).optional(),
-  language: z.enum(['en', 'es', 'fr', 'de']).optional(),
-  tone: z.enum(['neutral', 'formal', 'casual', 'persuasive']).optional(),
-  audience: z.string().max(64).optional(),
-  keywords: z.array(z.string().max(32)).max(10).optional()
+  userContext: z.string().max(150000).optional() // Increased limit for larger contexts (20k tokens + user text)
 });
 
 const RequestSchema = z.object({
@@ -79,14 +74,7 @@ function buildSystemPrompt(hasContext: boolean): string {
 // Build cache-optimized prompt structure for Gemini implicit caching
 function buildCacheOptimizedPrompt(left: string, context?: z.infer<typeof ContextSchema>): { system: string; user: string; cacheContext?: string } {
   // Check if context has meaningful values, not just if it exists
-  const hasContext = !!(context && (
-    context.userContext?.trim() ||
-    context.documentType ||
-    context.language ||
-    context.tone ||
-    context.audience?.trim() ||
-    (context.keywords && context.keywords.length > 0)
-  ));
+  const hasContext = !!(context && context.userContext?.trim());
   const systemPrompt = buildSystemPrompt(hasContext);
   
   if (!hasContext) {
@@ -98,18 +86,10 @@ function buildCacheOptimizedPrompt(left: string, context?: z.infer<typeof Contex
   
   // Build stable context block for caching - place immediately after system
   const sanitizedContext = context.userContext ? sanitizeContext(context.userContext) : '';
-  const sanitizedKeywords = context.keywords && context.keywords.length > 0 
-    ? context.keywords.map(keyword => sanitizeContext(keyword)).join(', ') 
-    : 'none specified';
   
   const stableContextBlock = `
-# Document Context Information
-Document Type: ${context.documentType || 'unspecified'}
-Language: ${context.language || 'unspecified'}
-Tone: ${context.tone || 'unspecified'}
-Target Audience: ${context.audience ? sanitizeContext(context.audience) : 'unspecified'}
-Keywords: ${sanitizedKeywords}
-Additional Context: ${sanitizedContext}
+# Writing Context
+${sanitizedContext}
 
 # Completion Task
 Provide the next few words or characters to continue this text:`;
@@ -209,14 +189,7 @@ export async function POST(request: NextRequest) {
 
     const { left, context } = validation.data;
     // Check if context has any meaningful values
-    const hasContext = !!(context && (
-      context.userContext?.trim() ||
-      context.documentType ||
-      context.language ||
-      context.tone ||
-      context.audience?.trim() ||
-      (context.keywords && context.keywords.length > 0)
-    ));
+    const hasContext = !!(context && context.userContext?.trim());
 
     // Development debug logging for request analysis
     if (process.env.NODE_ENV === 'development') {
