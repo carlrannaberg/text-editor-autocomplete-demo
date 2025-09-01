@@ -78,7 +78,15 @@ function buildSystemPrompt(hasContext: boolean): string {
 
 // Build cache-optimized prompt structure for Gemini implicit caching
 function buildCacheOptimizedPrompt(left: string, context?: z.infer<typeof ContextSchema>): { system: string; user: string; cacheContext?: string } {
-  const hasContext = !!context;
+  // Check if context has meaningful values, not just if it exists
+  const hasContext = !!(context && (
+    context.userContext?.trim() ||
+    context.documentType ||
+    context.language ||
+    context.tone ||
+    context.audience?.trim() ||
+    (context.keywords && context.keywords.length > 0)
+  ));
   const systemPrompt = buildSystemPrompt(hasContext);
   
   if (!hasContext) {
@@ -200,7 +208,25 @@ export async function POST(request: NextRequest) {
     }
 
     const { left, context } = validation.data;
-    const hasContext = !!context;
+    // Check if context has any meaningful values
+    const hasContext = !!(context && (
+      context.userContext?.trim() ||
+      context.documentType ||
+      context.language ||
+      context.tone ||
+      context.audience?.trim() ||
+      (context.keywords && context.keywords.length > 0)
+    ));
+
+    // Development debug logging for request analysis
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🚀 API Context Request:', {
+        hasContext,
+        contextFields: context ? Object.keys(context) : [],
+        userContextLength: context?.userContext?.length || 0,
+        requestLeft: left.slice(-30)
+      });
+    }
 
     // AI completion with timeout - longer timeout for context-aware requests
     const controller = new AbortController();

@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useEditor, EditorContent, Editor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { InlineComplete } from '@/lib/InlineComplete';
@@ -133,6 +133,14 @@ const AutocompleteEditor: React.FC = () => {
   const completionContext = useCompletionContext();
   const { addSkipLink, preferences, getHighContrastStyles } = useAccessibility();
   
+  // Create a ref to always get fresh context
+  const getContextRef = useRef<() => CompletionContextState>(() => createContextSnapshot(completionContext));
+  
+  // Update ref when context changes
+  useEffect(() => {
+    getContextRef.current = () => createContextSnapshot(completionContext);
+  }, [completionContext]);
+  
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -140,7 +148,7 @@ const AutocompleteEditor: React.FC = () => {
         debounceMs: 120,
         maxPrefixLength: 1000,
         enabled: true,
-        getContext: () => createContextSnapshot(completionContext),
+        getContext: () => getContextRef.current(),
       }),
     ],
     content: '',

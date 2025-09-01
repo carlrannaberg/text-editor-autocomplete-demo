@@ -63,6 +63,15 @@ export const createContextAwareFetchTail = (getContext?: () => CompletionContext
     try {
       const contextPayload = hasMeaningfulContext(context) && context ? normalizeContextForAPI(context) : undefined;
       
+      // Development debug logging
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🔍 Context transmission debug:', {
+          hasContext: !!context,
+          hasMeaningfulContext: hasMeaningfulContext(context),
+          contextPayload,
+          left: left.slice(-50)
+        });
+      }
       
       const response = await fetch('/api/complete', {
         method: 'POST',

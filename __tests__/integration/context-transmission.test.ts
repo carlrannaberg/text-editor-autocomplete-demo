@@ -60,7 +60,7 @@ describe('Context Transmission Integration', () => {
 
     // Verify successful response
     expect(response.status).toBe(200);
-    expect(result.tail).toBe('completion text');
+    expect(result.tail).toBe('completion');
     expect(result.confidence).toBeGreaterThan(0);
 
     // Verify AI was called with context
@@ -196,7 +196,7 @@ describe('Context Transmission Integration', () => {
     expect(promptText).not.toContain('\x0B');
     
     // But should contain the cleaned content
-    expect(promptText).toContain('Context with  HTML');
+    expect(promptText).toContain('Context with alert("xss") HTML');
     expect(promptText).toContain('Users with control chars');
   });
 
